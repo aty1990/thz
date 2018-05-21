@@ -1,0 +1,154 @@
+<template>
+    <transition name="move">
+    	<div class="page-animate page-sale">
+            <v-header>
+                <mt-header title="淘花宅">
+                    <div slot="left">
+                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                    </div>
+                </mt-header>
+            </v-header>
+            <div class="wrapper">
+                <p class="pd-all-10 gray-font font-size-12" v-if="!flag">平台与第三方合作,根据您的订单匹配最优的交易价格</p>
+                <section class=" pd-all-10 flex" v-if="goodsObj.goodspic">
+                    <div class="img-wrap float">
+                        <img :src="goodsObj.goodspic" height="60px" width="60px">
+                    </div>
+                    <div class=" grow vertical pdl-10 text-left">
+                        <p class="text-deal font-size-12">{{goodsObj.goodsname}}</p>
+                        <div class="mgt-6 flex full-w vertical text-left">
+                            <p class="font-size-10 full-w" >购买价格</p>
+                            <h3 class="grow full-w">￥{{goodsObj.buyprice}}</h3>
+                        </div>
+                    </div>
+                </section>
+                <ul v-if="goodsObj.goodspic">
+                    <li class="flex li-item white-bg">
+                        <span class="grow mar">买家：<span class="fr">{{goodsObj.sellcompany}}</span></span>
+                    </li>
+                    <li class="flex li-item white-bg">
+                        <span class="grow mar">出价：<span class="fr" style="color:red;">￥{{goodsObj.sellprice}}</span></span>
+                    </li>
+                    <li class="flex li-item white-bg">
+                        <span class="grow mar">到账银行卡：<span class="fr">{{goodsObj.CardBankName}} <span>({{goodsObj.wageCard?goodsObj.wageCard.slice(goodsObj.wageCard.length-4):""}})</span></span></span>
+                    </li>
+                </ul>
+                <div class="button-wrap mgt-20" v-if="goodsObj.goodspic">
+                    <mt-button type="primary" size="large" :disabled="btnState" @click="commit" class="font-size-16">确认出售</mt-button>
+                </div>
+                <div class="flex mgt-80 vertical" v-if="flag">
+                    <img src="/thz/static/pic_wujilu@2x.png" width="50%">
+                    <p class="mgt-20 gray-font">订单正在处理中...</p>
+                </div>
+                <router-view />
+            </div>
+        </div>
+    </transition>
+</template>
+<script>
+    import VHeader from '@/components/header'
+    import { Actionsheet } from 'mint-ui';
+    import Vue from 'vue'
+    import api from '@/fetch/api.js'
+    export default {
+        components: { VHeader},
+        data() {
+			return {
+                btnState : false,
+                goodsObj : {},
+                flag : false
+			}
+		},
+		mounted() {
+            this.initData(); 
+		},
+		methods : {
+			initData(){
+				let _self = this;
+				api.withdraws({}).then(res=>{
+                    // orderStatus 等于C才可以转卖
+                    if(res.body.orderStatus=="C"){
+                         _self.goodsObj = res.body;
+                    }else{
+                        _self.flag = true;
+                    }
+				})
+			},
+            toBack(){
+                $.publish('app.list');
+                $.publish('app.refreshOrderDetail');
+                this.$router.back();
+            },
+            commit(){
+            	let _self = this;
+                layer.open({
+                    content: '确认出售该商品？'
+                    ,style: 'width:80%;'
+                    ,anim :'up'
+                    ,btn: ['确定', '取消']
+                    ,yes: function(index){
+                        _self.btnState = true;
+                        _self.goDeal();
+                        layer.close(index);
+                    }
+                });
+            },
+            goDeal(){
+                let _self = this;
+                api.wxaskwithdraw({bankCardId:_self.goodsObj.userBankId}).then(res=>{
+                    if(res.code=="200"){
+                        layer.open({
+                            content:"出售成功"
+                            ,skin: 'msg'
+                            ,time: 2,
+                            end : function(){
+                                $.publish('app.list');
+                                $.publish('app.refreshOrderDetail');
+                                _self.$router.replace({name:"complete"});
+                            }
+                        })
+                    }else{
+                        layer.open({
+                            content:res.msg
+                            ,skin: 'msg'
+                            ,time: 2
+                        })
+                        _self.btnState = false;
+                    }
+                })
+            }
+        }
+    }
+</script>
+
+<style lang="scss">
+    .page-sale{
+        .img-wrap{
+            width: 150px;
+            img{
+                width: 100%;
+            }
+        }
+        .white-bg{
+            background: #fff;
+            font-size: 14px;
+        }
+        .full-w{
+            width: 100%;
+        }
+        .fr{
+            float: right;
+        }
+        .mar{
+        	margin-left: 10px;
+        }
+        .has-check-icon{
+            background: url("/thz/static/icon_duihao@2x.png") scroll 10px 35% no-repeat;
+            background-size: 14px;
+            padding: 5px 0 5px 30px;
+        }
+        .li-item{
+            padding: 20px 10px 20px 0px;
+        }
+    }
+</style>

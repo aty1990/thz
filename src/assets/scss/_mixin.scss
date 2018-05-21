@@ -1,0 +1,36 @@
+// 多行文本显示...
+@mixin text($rows){ 
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: $rows;
+	-moz-line-clamp: $rows;
+	-ms-line-clamp: $rows;
+	-o-line-clamp: $rows;
+	word-break: break-all; 
+	-webkit-box-orient: vertical; 
+	-moz-box-orient: vertical; 
+	-ms-box-orient: vertical; 
+	-o-box-orient: vertical; 
+	box-orient: vertical;
+	line-height: 20px;
+}
+
+// px转rem
+@function px2rem($px){
+	$rem : 37.5px;
+	@return ($px / $rem) + rem;
+}
+
+
+
+
+
+
+
+
+ 
+
+
+
+
