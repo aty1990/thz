@@ -4,7 +4,7 @@
 			<v-header>
 				<mt-header title="安全设置">
 					<div slot="left">
-						<mt-button icon="back" @click.native="toBack">返回</mt-button>
+						<mt-button icon="back" @click.native="toBack"></mt-button>
 					</div>
 				</mt-header>
 			</v-header>
@@ -13,9 +13,9 @@
 					<span class="grow is-link" v-tap="{methods : toRouter,params:'/makepwd'}">修改登录密码</span>
 				</div>
 			</div>
-			<!-- <div class="button-wrap mgt-20" >
+			<div class="button-wrap mgt-20" v-show="quit">
 			   	<mt-button type="primary" size="large" :disabled="btn2State" @click="dropout">退出登录</mt-button> 
-			</div> -->
+			</div> 
 			<router-view/>
 		</div>
 	</transition>
@@ -31,8 +31,12 @@
 		},
 		data() {
 			return {
-				btn2State: false
+				btn2State: false,
+				quit : false
 			}
+		},
+		mounted(){
+			this.quit = location.href.indexOf("thz-uat")>-1?true:false;
 		},
 		methods: {
 			toBack() {

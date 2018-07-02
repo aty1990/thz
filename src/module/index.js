@@ -3,6 +3,7 @@ import api from '../fetch/api'
 
 const state = {
     account : "",
+    firstName : "admin",
     pwd_reg : /^.*(?=.{6,20})(?=.*\d)(?=.*[a-zA-Z!@#$%^&*?]).*$/,  //密码强度正则，最少6位，最多20位，包括至少1个小写字母或者特殊字符，1个数字
     channel_pwd_reg : /^.*(?=.{6,12})(?=.*\d)(?=.*[a-zA-Z!@#$%^&*?]).*$/,  //密码强度正则，最少6位，最多12位，包括至少1个小写字母或者特殊字符，1个数字
     userInfo : null,
@@ -18,9 +19,9 @@ const actions = {
 }
 
 const getters = {
-    /*getWithdrawpre : state => state.withdrawpre,
-    appUrlInviterList : state => state.urls.appUrl_inviter_list,
-    appUrlWithdraw : state => state.urls.appUrl_withdraw*/
+    fullName(state){
+        return state.firstName
+    }
 }
 
 const mutations = {

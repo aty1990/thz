@@ -28,7 +28,7 @@
 </template>
 <script>
     import VHeader from '@/components/header'
-    import api from '@/fetch/api.js'
+    import api from '@/fetch/api'
     export default {
     	name: 'page-success',
         components: { VHeader},
@@ -37,12 +37,10 @@
 		},
 		methods : {
             toBack(){
-                this.$router.go(-2);
+                this.$router.back();
             },
             toOrder(){
-                $.publish('app.refreshOrderDetail');
-                $.publish('app.list');
-                this.$router.go(-2);
+                this.$router.back();
             },
             cancel(){
             	let _self = this;            	

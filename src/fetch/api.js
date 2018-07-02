@@ -69,7 +69,7 @@ export function postData(url, params,loadflag) {
         axios.post(url, params)
             .then(response => {
                 $("body").Loading("hide");
-                resolve(response.data);
+                resolve(response.data); 
             }, err => {
                 reject(err);
                 $("body").Loading("hide");
@@ -96,7 +96,7 @@ export default {
      * @return {[type]}        [description]
      */
     contracts(params){
-        return postData('/thz/contracts/params', params)
+        return postData('/thz/contracts/params', params,true)
     },
 
     /**
@@ -114,6 +114,14 @@ export default {
      */
     auditstat(params){
         return postData('/thz/user/auditstat', params)
+    },
+    /**
+     * 首页搜索
+     * @param  {[type]} params [description]
+     * @return {[type]}        [description]
+     */
+    indexSearch(params){
+        return postData('/thz/page/indexSearch', params,true)
     },
     /**
      * 首页 / 历史消息条数
@@ -177,7 +185,7 @@ export default {
      * @return {[type]}        [description]
      */
     pawnList(params){
-        return postData('/thz/order/pawnList', params)
+        return postData('/thz/order/pawnList', params,true)
     },
 
     /**
@@ -194,7 +202,7 @@ export default {
      * @return {[type]}        [description]
      */
     pawnOrderDetail(params){
-        return postData('/thz/order/detail', params)
+        return postData('/thz/order/detail', params,true)
     },
     /**
      * 转卖 / 申请转卖
@@ -234,7 +242,7 @@ export default {
      * @return {[type]}        [description]
      */
     indexGoodsPage(params){
-        return postData('/thz/page/indexGoodsPage', params)
+        return postData('/thz/page/indexGoodsPage', params,true)
     },
     /**
      * 首页 / 商品提交订单前展示页
@@ -250,7 +258,7 @@ export default {
      * @return {[type]}        [description]
      */
     loanrecord(params){
-        return postData('/thz/trans/loanrecord', params)
+        return postData('/thz/trans/loanrecord', params,true)
     },
     /**
      * 我的 / 分期详情
@@ -258,7 +266,7 @@ export default {
      * @return {[type]}        [description]
      */
     loandetail(params){
-        return postData('/thz/trans/loandetail', params)
+        return postData('/thz/trans/loandetail', params,true)
     },
     /**
      * 我的 / 交易记录
@@ -274,7 +282,7 @@ export default {
      * @return {[type]}        [description]
      */
     detail(params){
-        return postData('/thz/trans/detail', params)
+        return postData('/thz/trans/detail', params,true)
     },
 
      /**
@@ -307,7 +315,7 @@ export default {
      * @return {[type]}        [description]
      */
     getdefaultaddress(params){
-        return postData('/thz/user/getdefaultaddress', params)
+        return postData('/thz/user/getdefaultaddress', params,true)
     },
     /**
      * 我的 / 编辑地址渲染
@@ -315,7 +323,7 @@ export default {
      * @return {[type]}        [description]
      */
     getDeliveryAddressInfo(params){
-        return postData('/thz/user/getDeliveryAddressInfo', params)
+        return postData('/thz/user/getDeliveryAddressInfo', params,true)
     },
      /**
      * 首页 / 展示物流信息（退款）
@@ -323,7 +331,7 @@ export default {
      * @return {[type]}        [description]
      */
     express(params){
-        return postData('/thz/fill/express', params)
+        return postData('/thz/fill/express', params,true)
     },
     /**
      * 首页 / 提交物流信息（退款）
@@ -338,10 +346,12 @@ export default {
      * @param  {[type]} params [参数对象]
      */
     login(params) {
-        // 本地调试接口
-        return postData('/thz/user/login', params)
-        // uat pro 接口
-        //return postData('/thz/signIn', params)
+        let url = "/thz/signIn";
+        // 判断是否是在app登录或者本地登录
+        if(params.term || location.href.indexOf("8080")>0){
+            url = "/thz/user/login";
+        }
+        return postData(url, params)
     },
     /**
      * 首页 / 我的收货地址
@@ -349,7 +359,7 @@ export default {
      * @return {[type]}        [description]
      */
     getDeliveryAddress(params){
-        return postData('/thz/user/getDeliveryAddress', params)
+        return postData('/thz/user/getDeliveryAddress', params,true)
     },
     /**
      * 首页 / 新增收货地址
@@ -396,7 +406,7 @@ export default {
      * @param  {[type]} params [参数对象]
      */
     getDebitAmount(params){
-        return postData('/thz/credit/getDebitAmount', params)
+        return postData('/thz/credit/getDebitAmount', params,true)
     },
     /**
      * 协议绑卡发送验证码
@@ -419,7 +429,7 @@ export default {
      * @param  {[type]} params [参数对象]
      */
     aheadrepaymentpre(params) {
-        return postData('/thz/trans/aheadrepaymentpre', params)
+        return postData('/thz/trans/aheadrepaymentpre', params,true)
     },
     /**
      * 提前还款提交
@@ -433,7 +443,7 @@ export default {
      * @param  {[type]} params [参数对象]
      */
     repaymentpre(params){
-        return postData('/thz/trans/repaymentpre', params)
+        return postData('/thz/trans/repaymentpre', params,true)
     },
     /**
      * 当前还款提交
@@ -625,15 +635,24 @@ export default {
      * @return {[type]}        [description]
      */
     list(params){
-        return postData('/thz/order/list', params)
+        return postData('/thz/order/list', params,true)
+        //return postData('/thz/order/orderList', params,true)
     },
-     /**
+    /**
      * 我的 / 订单详情
      * @param  
      * @return {[type]}        [description]
      */
     orderdetail(params){
-        return postData('/thz/order/detail', params)
+        return postData('/thz/order/detail', params,true)
+    },
+    /**
+     * 我的 / 退款申请提交前页面渲染
+     * @param  
+     * @return {[type]}        [description]
+     */
+    rendering(params){
+        return postData('/thz/refund/rendering', params)
     },
     /**
      * 我的 / 银行卡列表
@@ -641,15 +660,7 @@ export default {
      * @return {[type]}        [description]
      */
     bankInfoList(params){
-        return postData('/thz/user/bankInfoList', params)
-    },
-    /**
-     * 我的 资料/ 银行卡信息显示
-     * @param  
-     * @return {[type]}        [description]
-     */
-    bankSelecter1(params){
-        return postData('/thz/bankSelecter', params)
+        return postData('/thz/user/bankInfoList', params,true)
     },
     /**
      * 添加银行卡
@@ -665,7 +676,7 @@ export default {
      * @return {[type]}        [description]
      */
     bankSelecter(params){
-        return postData('/thz/credit/bankSelecter', params)
+        return postData('/thz/credit/bankSelecter', params,true)
     },
     /**
      * 提交分期
@@ -705,6 +716,38 @@ export default {
      */
     channelRegister(params){
         return postData('/thz/market/user/out/register', params)
+    },
+    /**
+     * 帮助中心
+     * @param  {[type]} params [description]
+     * @return {[type]}        [description]
+     */
+    getHelpCenter(params){
+        return postData('/thz/user/getHelpCenter', params,true)
+    },
+    /**
+     * 微信支付
+     * @param  {[type]} params [description]
+     * @return {[type]}        [description]
+     */
+    pay(params){
+        return postData('/thz/thirdPay/pay', params,true)
+    },
+    /**
+     * 微信支付成功
+     * @param  {[type]} params [description]
+     * @return {[type]}        [description]
+     */
+    wxPayBack(params){
+        return postData('/thz/thirdPay/wxPayBack', params,true)
+    },
+     /**
+     * 微信支付取消
+     * @param  {[type]} params [description]
+     * @return {[type]}        [description]
+     */
+    payCancle(params){
+        return postData('/thz/thirdPay/payCancle', params,true)
     },
     /**
      * 将axios文件上传的函数返回

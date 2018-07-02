@@ -3,7 +3,7 @@
         <v-header>
             <mt-header title="登录">
                 <div slot="left">
-                    <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                    <mt-button  icon="back" @click.native="toBack"></mt-button>
                 </div>
                 <mt-button slot="right" class="mgr-8 gray-font-color" @click.native="register()">注册</mt-button>
             </mt-header>

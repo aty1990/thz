@@ -240,13 +240,14 @@
 </script>
 <style lang="scss">
 	.page-jkfqxy1{
+		background:#fff;
 	    .jkfq-box{
 	    	padding: 10px;
 	    	overflow-y:auto; 
 	    }
 	    p,div{
 	    	line-height: 20px;
-	    	font-size: 12px;
+	    	font-size: 14px;
 	    	text-align:justify;
 	    }
 	}

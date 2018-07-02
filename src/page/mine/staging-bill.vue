@@ -4,23 +4,24 @@
 			<v-header>
 				<mt-header title="分期账单">
 					<div slot="left">
-						<mt-button icon="back" @click.native="toBack">返回</mt-button>
+						<mt-button icon="back" @click.native="toBack"></mt-button>
 					</div>
 				</mt-header>
 			</v-header>
 			<vue-better-scroll  class="wrapper staging-bill">
 				<section class="section" v-show="staging.periodNum">
-					<div class="pd-all-10 white-bg radius-top">
+					<div class="pd-all-10 radius-top">
 						<p class="pdb-10">
 							<span v-if="staging.taskStat == '7A' || staging.taskStat == '7C'">已还清</span>
 							<span v-if="staging.taskStat == '5'">还款中</span>
+							<span v-if="staging.taskStat == '7D'">关闭订单结清</span>
 						</p>
 						<div>
 							<p class="center gray-font">全部待还(元)</p>
 							<p class="center"><b class="font-size-36">{{staging.allRepayment}}</b></p>
 							<p class="center gray-font mgt-4">分期总金额：{{staging.sumAmount}}元  分{{staging.periodNum}}期还清</p>
 							<div class="mgt-20">
-		                        <mt-button type="primary" class="button" v-if="staging.taskStat == '7A' || staging.taskStat == '7C'"  size="large">提前还款</mt-button>
+		                        <mt-button type="primary" class="button" v-if="staging.taskStat == '7A' || staging.taskStat == '7C' || staging.taskStat == '7D'"  size="large">提前还款</mt-button>
 		                        <mt-button type="primary" v-else  size="large" v-tap="{methods : toplay1,params:'early-repay'}" >提前还款</mt-button>
 							</div>
 						</div>	
@@ -60,7 +61,7 @@
 			</vue-better-scroll>
 			<div class="no-data-msg" v-show="!staging.periodNum">
 				<div class="ds-table">
-					<div class="ds-tell"><img src="/thz/static/load.png" class="loop"></div>
+					<div class="ds-tell"><img src="/thz/static/load.png" class="loop" width="22"></div>
 				</div>
 			</div>
 			<router-view />
@@ -116,6 +117,7 @@
                 });
 			},
 			toBack() {
+				$.publish('app.staging');
 				this.$router.back();
 			},
 			toplay(periodNum){
@@ -129,19 +131,18 @@
 				this.initData();
 			},
 			jkfqxy(){
-				this.$router.push({
-					name : "jkfqxy"
-				})
+				this.$router.push("/home/staging/jkfqxy");
 			}
 		}
 	}
 </script>
-<style lang="scss">
-	$theme-bg-color:#F45051;
+<style lang="scss" scoped>
+	@import '../../assets/scss/mixin'; 
+    @import '../../assets/scss/color';
 	.page-staging-bill{
 		.mint-header {
-			background-color: #FFFFFF;
-			color: #000;
+			background-color: $text-white-color;
+			color: $text-block-color;
 			border: none;
 		}
 	}
@@ -149,18 +150,19 @@
 		.mint-button--large {
 		    width: 70%;
 		    margin-left: 15%;
-		    border-radius: 20px;
+		    border-radius: px2rem(20);
 	    }	
 		.section{
-			background: #F45051;
-			padding:10px 10px 0;
+			background: $text-red-color;
+			padding:px2rem(10) px2rem(10) 0;
 		}
 		.radius-top{
-			border-top-left-radius:10px;
-			border-top-right-radius:10px;
+			border-top-left-radius:px2rem(10);
+			border-top-right-radius:px2rem(10);
+			background-color: $text-white-color;
 		}
 		.white-bg{
-			background: #fff;
+			background: $text-white-color;
 		}
 		.fr{
 			float: right;
@@ -169,10 +171,10 @@
 			text-align: center;
 		}
 		.item{
-			padding:10px 10px 10px 20px;
-			margin:10px;
-			border-radius:10px;
-			line-height:30px;
+			padding:px2rem(10) px2rem(10) px2rem(10) px2rem(20);
+			margin:px2rem(10);
+			border-radius:px2rem(10);
+			line-height:px2rem(30);
 			position: relative;
 			overflow: hidden;
 		}
@@ -181,14 +183,14 @@
 		}
 		.color-block{
 			position: absolute;
-			width: 6px;
+			width: px2rem(6);
 			height: 100%;
 			background: #ED727B;
 			left:0;
 			top:0;
 			z-index: 2;
-			border-top-left-radius:10px;
-			border-bottom-left-radius:10px;
+			border-top-left-radius:px2rem(10);
+			border-bottom-left-radius:px2rem(10);
 		}
 		.blue{
 			background: #5DACF6;
@@ -197,10 +199,10 @@
 			background: #47A846;
 		}
 		.min-btn{
-			padding:6px 18px;
-			border-radius:4px;
+			padding:px2rem(10) px2rem(18);
+			border-radius:px2rem(4);
 			background:$theme-bg-color;
-			color:#fff;
+			color:$text-white-color;
 		}
 		.over{
 			background: rgba(0,0,0,0);
@@ -208,10 +210,10 @@
 		}
 		.over1{
 			background: #9D9D9D;
-			color: #fff;
+			color: $text-white-color;
 		}
 		.w-70{
-			width: 70px;
+			width: px2rem(70);
 		}
 		.button{
 			background: #D9D9D9;

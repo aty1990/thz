@@ -8,13 +8,13 @@
                     </div>
                 </mt-header>
             </v-header>
-            <div class="wrapper">
+            <div class="wrapper" v-if="hasData">
                 <p class="font-size-20 repay-title yinghuan">
                     <span>应还金额：</span>
                     <span class="font-size-24">{{earlyrepayObj.periodAmount}}元</span>
                 </p>
                 <section class="pd-all-20 repay-card">
-                    <div class="flex more-icon item" v-tap="{methods:chooseCard,params:earlyrepayObj.bankCardId}">
+                    <div class="flex more-icon item pdt-6 pdb-6" v-tap="{methods:chooseCard,params:earlyrepayObj.bankCardId}">
                         <div class="w-60 pd-all-4"><img v-bind:src="earlyrepayObj.bankLogo" width="90%"></div>
                         <div class="grow pd-all-4 font-size-14">
                             <p class="pd-all-4">{{earlyrepayObj.bankName}}</p>
@@ -28,10 +28,7 @@
                     <!-- <mt-cell class="item" title="支付手续费">{{earlyrepayObj.charge}}</mt-cell> -->
                     <div class=" item hkje-cls line-ear">
                         <h5 class="label">还款金额&nbsp;&nbsp;</h5>
-                        <input type="tel" placeholder="最高还款xxx元" class="money early"/>
-						<input type="tel" class="money1 early1"  />
-						<input type="tel" class="money2 early2" disabled="disabled"  />
-                        
+                        <input type="tel" :placeholder="placeholder"  class="repay-money" v-model="repayMoney" @focus="lstValus" @input="lst"/>
                     </div>
                     <div v-show="other">
                     	<p class="other"  @click="jieq(earlyrepayObj.allRepayment)">
@@ -48,7 +45,12 @@
                     </div>
                 </section>
             </div>
-            <router-view></router-view>
+            <div class="no-data-msg" v-if="!hasData">
+				<div class="ds-table">
+					<div class="ds-tell"><img src="/thz/static/load.png" class="loop" width="22"></div>
+				</div>
+			</div>
+            <router-view />
         </div>
     </transition>
 </template>
@@ -61,85 +63,38 @@
         data() {
 			return {
 				earlyrepayObj:{},
-                commitFlag : false,				
+                placeholder : "最高还款xxx元",
+                submitFlag : false,
+                periodCaptial : "",
+                repayMoney : "",
+                commitFlag : true,	
                 current : 1,
                 other : false,
+                hasData : false,
                 other1:true,
                 flag:false
             }
 		},
 		mounted() {
-            if(sessionStorage.getItem('bankCardId1')){
-                sessionStorage.removeItem('bankCardId1');
-            }			
 			this.initData();  
 		},
 		methods : {
 			initData(){
 				let _self = this;
-				var data=JSON.parse(localStorage.getItem("userInfo"))
 				api.bankInfoList({}).then(res=>{
-					var userBankCardId=res.body[0].bankcardId;
+					let userBankCardId = res.body[0].bankcardId;
 					if(res.code == "200"){
 							api.aheadrepaymentpre({userBankCardId:userBankCardId}).then(res=>{							
 		                    if(res.code=="200"){
 		                    	_self.earlyrepayObj = res.body;
-		                    	var allRepayment=parseFloat(res.body.allRepayment);
-		                    	var lowestRepayment=parseFloat(res.body.lowestRepayment);
-		                    	$(".money1").val(parseFloat(res.body.lowestRepayment));
-		                    	$(".money").attr("placeholder", "最高还款" + allRepayment + "元");
-		                    	if(allRepayment == lowestRepayment) {
-		                    		$(".money2").val(allRepayment);
-									$(".money1").hide();
-									$(".money2").show();
-									$(".money").attr("disabled", "disabled");
-									$(".money").css("background", "#fff");
-		                    	}
-		                    	$(".money1").on("click", function() {
-									$(".money").focus();
-									$(".money1").hide();
-								})
-		                    	$(".money").focus(function() {
-									$(".money").css("text-align", "left")
-									$(".money1").hide();
-									
-									if($(".money").val() != "") {
-										$(".money").val();
-									} else {
-										$(".money").val($(".money1").val())
-									}
-									_self.other = true;			              
-					                
-								})
-		                    	if(allRepayment  <= lowestRepayment){
-		                    		$(".money").attr("disabled", "disabled");
-		                    	}
-		                    	$(".money").blur(function() {
-									$(".money").css("width", "70%");
-									$(".money").css("text-align", "right");
-									if($(".money1").css("display") == "none") {
-										$(".money").val()
-									}	
-								})					
-		
-								if(res.body.periodAmount == 0) {
-									_self.periodCaptial=$(".money1").val()						
-									
-									$(".money").focus(function() {
-										$(".money").css("text-align", "left")							
-										_self.periodCaptial=$(".money").val()
-									})
-									$(".money").blur(function() {
-										$(".money").css("width", "70%");
-										$(".money").css("text-align", "right");
-										_self.periodCaptial=$(".money").val()
-									});
-								}
-								var isLess = parseFloat(allRepayment) <= parseFloat(lowestRepayment);
-								if(isLess) {
-									$(".money").attr("disabled", "disabled");
-								}
-							    _self.flag = true;
+                                _self.$nextTick(()=>{
+                                    _self.hasData = true;
+                                    let allRepayment = Number(res.body.allRepayment);
+                                    let lowestRepayment= Number(res.body.lowestRepayment);
+                                    _self.periodCaptial = res.body.lowestRepayment;
+                                    _self.placeholder =  "最高还款" + allRepayment + "元";
+                                    _self.submitFlag = Number(allRepayment) <= Number(lowestRepayment)?true:false;
+                                });
 		                    }
 						})
 					}else if(res.code=="111"){
@@ -152,24 +107,22 @@
 	                    });
 					}
 				})
-
 			},
             toBack(){
                 this.$router.back();
             },
-            commit(allRepayment,lowestRepayment,taskId,bankCardId1){
-            	let _this=this;
-            	_this.other = false; 
-            	if(!_this.flag) {					
-					return false;
-				}
-				let bankCardId = sessionStorage.getItem('bankCardId1');
-				let repayMoney = _this.isLess ? allRepayment : $(".money").val()||lowestRepayment;
-				if(!bankCardId) {
-					bankCardId = bankCardId1;
-				}
-                if(repayMoney){
-                    let early = parseFloat(repayMoney)+"";
+            lst(){
+                this.commitFlag = this.repayMoney.length>0?false:true;
+            },
+            lstValus(){
+                this.commitFlag = this.repayMoney.length>0?false:true;
+                this.other = true;    
+            },
+            commit(){
+            	let _self = this;
+            	_self.other = false; 
+                if(this.repayMoney){
+                    let early = Number(this.repayMoney)+"";
                     if(early.indexOf(".")!=-1){
                         let regu = "^[0-9]+[\.][0-9]{0,2}$";   
                         let re = new RegExp(regu);   
@@ -190,57 +143,52 @@
                     });
                     return;   
                 }
-				if(!_this.isLess) {
-					// 输入还款金额大于当期应还金额
-					if(parseFloat(repayMoney) - parseFloat(allRepayment) > 0) {
-						layer.open({
-	                        content:'还款金额不得大于最高还款金额' + allRepayment + '元'
-	                        ,skin: 'msg'
-	                        ,time: 2 
-	                    });
-						
-						return false;
-					}
-					// 输入还款金额小于当期应还金额
-					if(parseFloat(repayMoney) < parseFloat(lowestRepayment)) {
-						layer.open({
-	                        content:'还款金额不得小于最低还款金额' + lowestRepayment + '元'
-	                        ,skin: 'msg'
-	                        ,time: 2 
-	                    });
-						
-						return false;
-					}
-				}
-                this.commitFlag = true;
-                let params = {taskId: taskId,bankCardId: bankCardId,repayMoney: repayMoney};
-				api.askaheadrepay(params).then(res=>{
-					sessionStorage.removeItem('bankCardId1')
-                    if(res.code=="200"){                    	
-                    	layer.open({
-	                        content: res.msg
-	                        ,skin: 'msg'
-	                        ,time: 2,
-	                        end:function(){
-	                        	_this.$router.replace({name:"fqzd"});
-	                        	_this.$parent.loadData();
-	                        }
-	                    });
+                // 输入还款金额大于当期应还金额
+                if(Number(this.repayMoney) - Number(this.earlyrepayObj.allRepayment) > 0){
+                    layer.open({
+                        content:'还款金额不得大于最高还款金额' + this.earlyrepayObj.allRepayment + '元'
+                        ,skin: 'msg'
+                        ,time: 2 
+                    });
+                    return false;
+                }
+                // 输入还款金额小于当期应还金额
+                if(Number(this.repayMoney) < Number(this.earlyrepayObj.lowestRepayment)) {
+                    layer.open({
+                        content:'还款金额不得小于最低还款金额' + this.earlyrepayObj.lowestRepayment + '元'
+                        ,skin: 'msg'
+                        ,time: 2 
+                    });
+                    return false;
+                }
+                let params = {
+                    taskId: this.earlyrepayObj.taskId,
+                    bankCardId: this.earlyrepayObj.bankCardId,
+                    repayMoney: this.repayMoney
+                };
+                api.askaheadrepay(params).then(res=>{
+                    if(res.code=="200"){                        
+                        layer.open({
+                            content: res.msg
+                            ,skin: 'msg'
+                            ,time: 2,
+                            end:function(){
+                                _self.$router.replace({name:"fqzd"});
+                                _self.$parent.loadData();
+                            }
+                        });
                     }else if(res.code=="111"){
                         // 判断安卓和微信
-                        if(!sessionStorage.getItem("term")){
-                            window.location.href='${project.domain}/index';
-                        }else{
-                            _this.$router.push("/login")
-                        }
-	                }else{
-						layer.open({
-	                        content: res.msg
-	                        ,skin: 'msg'
-	                        ,time: 2
-	                    });
-					}
-				})
+                       _self.$router.push("/login")
+                    }else{
+                        this.commitFlag = false;
+                        layer.open({
+                            content: res.msg
+                            ,skin: 'msg'
+                            ,time: 2
+                        });
+                    }
+                })
             },
             chooseCard(e){
             	sessionStorage.setItem("bankCardId",e.params)
@@ -249,24 +197,14 @@
                     name : "ebankcard",
                     query:{current:this.current}
                 });
-                
             },
             jieq(allRepayment){
-            	$(".money").val(allRepayment);
-            	$(".zui").hide();
-            	$(".money").css("width", "70%");
-				$(".money").css("text-align", "right");
-				
-				this.periodCaptial=allRepayment;
-				this.other = false;
+                this.repayMoney = allRepayment;
+                this.commitFlag = false;
             },
             low(lowestRepayment){
-            	this.periodCaptial=lowestRepayment;
-            	this.other = false;
-            	$(".money").val(lowestRepayment);
-            	$(".zui").hide();
-            	$(".money").css("width", "70%");
-				$(".money").css("text-align", "right");
+                this.repayMoney = lowestRepayment;
+                this.commitFlag = false;
             },
             modifyCard(obj){
             	sessionStorage.setItem('bankCardId1',obj.bankCardId)
@@ -282,54 +220,37 @@
         }
     }
 </script>
-<style lang="scss">
-    $color:#F45051;
+<style lang="scss" scoped>
+     @import '../../assets/scss/mixin';
+     @import '../../assets/scss/color';
     .page-repayment{
+        background-color: $text-white-color;
         .wrapper{
             overflow-y:auto;
         }
         .mint-header {
-            background-color: $color;
+            background-color: $theme-bg-color; 
             color: #fff;
             border: none;
             border-bottom:none;
             height:41px;
         }
         .repay-title{
-            background-color: $color;
+            background-color: $theme-bg-color;
             color:#fff;
-            padding:40px 0 40px 20px;
+            padding:px2rem(40) 0 px2rem(40) px2rem(20);
         }
         .w-60{
-            width:60px;
+            width:px2rem(60);
         }
         .more-icon{
-            background: url("/thz/static/href.png") scroll 98% 50% no-repeat;
-            background-size: 20px;
+            background: url("/thz/static/href.png") scroll 94% 50% no-repeat;
+            background-size: px2rem(20);
             background-color: #fff;
         }
-        .early{
-        	width:45%;
-        	float: left;
-        	font-size:15px;
-        	line-height: 22px;
-        	background:#fff;
-        	color: #000;
-        }
-        .early1{
-        	background:#fff;
-        	display:block;
-        	line-height: 22px;
-        	text-align: right;
-        	font-size:15px;width:25%;
-        }
-        .early2{
-        	background:#fff;
-        	display:none;
-        	line-height: 22px;
-        	text-align: right;
-        	font-size:15px;
-        	width:25%;
+        .repay-money{
+            width: 72%;
+            text-align:right;
         }
         .line-ear{
         	height: 50px;
@@ -337,33 +258,34 @@
         .repay-card{
             border-top-left-radius:10px;
             border-top-right-radius:10px;
-            background:#fff;
-            margin-top:-22px;
+            margin-top:px2rem(-22);
+            background:$text-white-color;
             width:100%;
         }
         .mint-cell-value{
-        	margin-right: 10px;
+        	margin-right: px2rem(10);
         }
         .item{
-            -box-shadow: 1px 1px 1px gray;
             -webkit-box-shadow: 0px 2px 5px gray;
-            margin-bottom: 10px;
-            border-radius:6px;
+            -box-shadow: 1px 1px 1px gray;
+            margin-bottom: px2rem(14);
+            border-radius:px2rem(6);
+            padding: 0 px2rem(10);
         }
         .mint-cell-title{
-        	margin-left: 10px;
+        	margin-left: px2rem(10);
         }
         .blue-font{
-            color:#7ABDC6;
+            color:$text-blue-color;
         }
         .hkje-cls{
-            padding : 14px 0;
-            font-size:16px;
+            padding : px2rem(14) 0;
+            font-size:px2rem(16);
             .label{
-                padding-left:10px;
+                padding-left:px2rem(10);
                 width: 25%;
                 float: left;
-                margin-top: 3px;
+                margin-top: px2rem(3);
             }
             input{
                 outline:none;
@@ -371,10 +293,10 @@
             }
         }
         .other{
-            border:1px solid #E1E6E0;
+            border:px2rem(1) solid #E1E6E0;
             border-top:none;
             background:#fff;
-            padding:12px 10px;
+            padding:px2rem(12) px2rem(10);
         }
         .other1{
         	background: rgba(0,0,0,0);
@@ -385,7 +307,7 @@
         	width: 40%;
         }
         .has-border{
-            border:1px solid #E1E6E0;
+            border:px2rem(1) solid #E1E6E0;
         }
         input:disabled, input[disabled]{ 
             color: #000; 

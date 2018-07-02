@@ -4,7 +4,7 @@
         <v-header>
             <mt-header title="身份信息">
                 <div slot="left">
-                    <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                    <mt-button  icon="back" @click.native="toBack"></mt-button>
                 </div>
                 
             </mt-header>
@@ -15,7 +15,7 @@
                     <div class="card-box-wrap">
                         <span class="prev-top">{{prevDesc}}</span> 
                         <i class="icon-camera scale-4 mgt-6"></i>
-                        <input type="file" class="upload-file" id="front"  @change="imagePreview($event)"/>
+                        <input type="file" class="upload-file" id="front" accept="image/*" capture="camera"  @change="imagePreview($event)"/>
                         <img v-show="paramsObj.frontIcon" :src="paramsObj.frontIcon" class="front-icon" height="100px" width="100%">
                     </div>
                 </section>
@@ -23,19 +23,19 @@
                     <div class="card-box-wrap">
                         <span class="after-top">{{afterDesc}}</span> 
                         <i class="icon-camera  scale-4 mgt-6"></i>
-                        <input type="file" class="upload-file" id="back"  @change="imagePreview($event)"/>
+                        <input type="file" class="upload-file" id="back" accept="image/*" capture="camera" @change="imagePreview($event)"/>
                         <img v-show="paramsObj.backIcon" :src="paramsObj.backIcon" class="front-icon" height="100px" width="100%">
                     </div>
                 </section>
             </div>
             <div class="white-bg pdl-16">
-                <div class="input has-bottom-border" >
-                    <p>姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名</p>
-                    <input type="text" class="user_name" v-model="paramsObj.id_name" :disabled="!editFlag"  style="width: 50%;color:#000;" @input="verfiy">
-                    <div class="edit" v-show="editFlag">
-                        <img src="/thz/static/icon_edit@2x.png" style="width: 12px;margin-left: 30px;" />
-                    </div>
-                </div>
+            	<div class="input has-bottom-border" >
+					<p>姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名</p>
+					<input type="text" class="user_name" v-model="paramsObj.id_name" :disabled="!editFlag"  style="width: 50%;color:#000;" @input="verfiy">
+					<div class="edit" v-show="editFlag">
+						<img src="/thz/static/icon_edit@2x.png" style="width: 12px;margin-left: 30px;" />
+					</div>
+				</div>
                <div class="input has-bottom-border">
                     <p>身份证号</p>
                     <p type="text" disabled="disabled" class="input_p user_number">{{paramsObj.id_number}}</p>

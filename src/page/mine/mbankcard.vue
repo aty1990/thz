@@ -2,30 +2,28 @@
     <transition name="move">
     	<div class="page-animate page-mbankcord">
             <v-header>
-                <mt-header title="银行卡">
+                <mt-header title="添加银行卡">
                     <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                        <mt-button  icon="back" @click.native="toBack"></mt-button>
                     </div>
                 </mt-header>
             </v-header>
             <div class="wrapper">
                 <div class="bk-input-wrap flex" >
-                    <label class="w-60">持卡人</label>
-                    <input type="text" placeholder="请输入持卡人姓名" v-model="userName" readonly>
+                    <label class="w-200">持卡人</label>
+                    <input type="text" placeholder="请输入持卡人姓名" v-model="userName" :readonly="readonly">
                 </div>
                 <div class="bk-input-wrap flex" >
-                    <label class="w-60">银行预留手机号</label>
+                    <label class="w-200">银行预留手机号</label>
                     <input type="text" placeholder="请输入持卡人姓名" v-model="phone"  readonly>
                 </div>
                 <div class="bk-input-wrap flex" >
-                    <label class="w-60">储蓄卡号</label>
+                    <label class="w-200">储蓄卡号</label>
                     <input type="tel" placeholder="请输入银行卡号" class="bandcard-input"  maxlength="25"  v-model="cardNo" @keyup="verCardNo($event)">
                     <i class="icon-msg scale-5" @click="suppertBank"></i>
                 </div>
                 <div class="pd-all-10 text-box">
-                    <!--  <p class="gray-font font-size-10 pd-all-4">友情提示：</p>
-                    <p class="gray-font font-size-10 pd-all-4">1:请绑定持卡人本人的常用储蓄银行卡;</p> -->
-                    <p class="gray-font font-size-14 pd-all-4">请确保卡内余额充足,绑卡后会扣款<b class="red font-size-16">{{price}}</b>元以校验卡片。</p>
+                    <p class="gray-font font-size-14 pd-all-4" v-show="readonly">请确保卡内余额充足,绑卡后会扣款<b class="red font-size-16">{{price}}</b>元以校验卡片。</p>
                     <div class="mgt-20">
                         <mt-button type="primary" size="large" :disabled="cmtState" @click="bindCard" class="font-size-14">绑卡</mt-button> 
                         <p class="gray-font font-size-10 mgt-6 flex"><i class="icon-tip scale-6 mgb-3"></i><span>以上信息经加密处理,仅用于银行卡验证</span></p>
@@ -77,6 +75,7 @@
 			return {
                 userName:"",
                 sendcode : false,
+                readonly : sessionStorage.bindCardType=="1"?true:false,
                 phone : localStorage.account,
                 cmtState : true,
                 codeText : "获取验证码",
@@ -96,7 +95,6 @@
             api.getDebitAmount().then(res=>{
                 _self.price = res.body;
             });
-
             api.bankSelecter({userId:this.userInfo.userId}).then(res=>{
                 if(res.code=="200"){
                     _self.bankCardList = res.body;
@@ -108,7 +106,6 @@
                     });
                 }  
             });
-
         },
 		methods : {
             toBack(){
@@ -143,7 +140,8 @@
                 this.sendCode();
             },
             bindCard(){
-               this.sendcode = true; 
+               
+               this.sendCode();
             },
             lstCode(){
                 this.submitFlag = (this.code.length==6?false:true);
@@ -158,6 +156,7 @@
                             ,skin: 'msg'
                             ,time: 2 
                         });
+                        _self.sendcode = true; 
                         // 倒计时60s
                         _self.timer = setInterval(function(){
                             _self.time--;
@@ -180,14 +179,15 @@
             submit(){
                 let _self = this;
                 this.submitFlag = true;
-                api.payBindCard({accNo:this.cardNo.replace(/[ ]/g, ""),vCode:this.code}).then(res=>{                  
+                // 1为资料采集绑卡 需要扣验卡费
+                api.payBindCard({accNo:this.cardNo.replace(/[ ]/g, ""),vCode:this.code,type:sessionStorage.bindCardType=="1"?"1":"0"}).then(res=>{                  
                     if(res.code=="200"){
                         layer.open({
                             content: res.msg
                             ,skin: 'msg'
                             ,time: 2,
                             end : function(){
-                                 _self.$parent.loadData();
+                                _self.$parent && _self.$parent.loadData();
                                 _self.toBack();
                             }
                         });
@@ -204,10 +204,11 @@
         }
     }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
     @import '../../assets/scss/mixin';
     .page-mbankcord{
-        .w-60{
+        height: 100%;
+        .w-200{
             width: px2rem(200);
             text-align: center;
             text-align:left;
@@ -271,10 +272,10 @@
                 justify-content: flex-start;
                 padding-top: px2rem(10);
                 span{
-                    width: 33%; 
+                    width: 47%; 
                     padding: px2rem(4) 0;
                     text-indent: px2rem(16);
-                    font-size: 12px;
+                    font-size: px2rem(16);
                     position: relative;
                     color:#9D9D9D;
                     &:after{
@@ -356,6 +357,9 @@
         .red{
             color: #F64F53;
             font-weight: bold;
+        }
+        .gray-font{
+            letter-spacing: 1px;
         }
     }
 </style>

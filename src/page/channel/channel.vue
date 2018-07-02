@@ -100,13 +100,13 @@
                                 if(browser.versions.ios){
                                     location.href = "https://www.pgyer.com/wcvk";  
                                 }else{
-                                    location.href = "http://thz-static.oss-cn-shanghai.aliyuncs.com/app/thz_web_v1.0_20180419.apk";
+				                    location.href = "http://app.mi.com/details?id=com.thz.web.action&ref=search";
                                 }
                             }
                         });
                         // 手机号为黑名单
                     }else if(res.code=="401"){
-                        location.href = "https://m.vjiehu.com/jiehu/product/html/market.html";
+                        location.href = "https://go.vjiehu.com/go/index.html#/home?page=2";
                     }else{
                         // 手机未注册，调用注册接口
                         _self.postData("/thz/market/user/out/register",{userMob:this.phone,userPwd:this.password,smsNum:this.code},function(){
@@ -160,12 +160,12 @@
                                 if(browser.versions.ios){
                                     location.href = "https://www.pgyer.com/wcvk";        
                                 }else{
-                                    location.href = "http://thz-static.oss-cn-shanghai.aliyuncs.com/app/thz_web_v1.0_20180419.apk";
+				                    location.href = "http://app.mi.com/details?id=com.thz.web.action&ref=search";
                                 }  
                             }
                         });
                     }else if(res.code=="401"){
-                        location.href = "https://m.vjiehu.com/jiehu/product/html/market.html";
+                        location.href = "https://go.vjiehu.com/go/index.html#/home?page=2";
                     }else{
                         if(_self.time<60) return;
                         let rsa = new r.RSAKey();

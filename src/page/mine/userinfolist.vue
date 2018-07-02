@@ -4,7 +4,7 @@
 			<v-header>
 				<mt-header title="激活淘花宅分期">
 					<div slot="left">
-						<mt-button icon="back" @click.native="toBack">返回</mt-button>
+						<mt-button icon="back" @click.native="toBack"></mt-button>
 					</div>
 				</mt-header>
 			</v-header>
@@ -96,7 +96,6 @@
 						</div>
 					</div>
 					<div class="button-wrap mgt-20">
-		               <!--  <mt-button v-if="person!=2 && work!=2 && contact!=2" id="btn2State" type="primary"  size="large" :disabled="btn2State" @click="commit1">提交</mt-button> -->
 		                <mt-button type="primary" size="large" :disabled="btn1State" @click="stages">分期申请</mt-button>
 		                <p class="font-size-12 mgt-16 flex">点击分期申请代表确认并阅读<span class="blue-class" @click="jkfqxy">《借分期分期协议》</span></p>
 		            </div>
@@ -215,6 +214,8 @@
                         	_self.$router.push({name : "cyk"});
                         } 
                     } else {
+                    	// 1为资料采集绑卡 需要扣验卡费
+                    	sessionStorage.bindCardType = "1";
                         _self.$router.push({
 							name : target.attr("router-name")
 						});

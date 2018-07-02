@@ -4,17 +4,17 @@
             <v-header>
                 <mt-header title="还款">
                     <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                        <mt-button  icon="back" @click.native="toBack"></mt-button>
                     </div>
                 </mt-header>
             </v-header>
-            <div class="wrapper iscroll repayment-wrap">
+            <div class="wrapper iscroll repayment-wrap" v-if="hasData">
                 <p class="font-size-20 repay-title">
                     <span>剩余金额：</span>
                     <span class="font-size-24">{{repayObj.periodAmount}}元</span>
                 </p>
-                <section class="pd-all-20 repay-card">
-                    <div class="flex more-icon item" v-tap="{methods:chooseCard,params:repayObj.bankCardId}">
+                <div class="pd-all-20 repay-card">
+                    <div class="flex more-icon item pdt-6 pdb-6" v-tap="{methods:chooseCard,params:repayObj.bankCardId}">
                         <div class="w-60 pd-all-4"><img :src="repayObj.bankLogo" width="100%"></div>
                         <div class="grow pd-all-4 font-size-14">
                             <p class="pd-all-4">{{repayObj.bankName}}</p>
@@ -27,14 +27,20 @@
                     <mt-cell class="item" title="含逾期费">{{repayObj.penaltyAmount}}</mt-cell>
                     <!-- <mt-cell class="item" title="支付手续费">{{repayObj.charge}}</mt-cell> -->
                     <mt-cell class="item" title="还款金额">
-                    	<input type="tel" class="yinhuan1 blue-font"/>
+                    	<input type="tel" class="blue-font repay-money" v-model="repayMoney" :disabled="disabled" @focus="clearText" @blur="resetText" @input="lst"/>
                     </mt-cell>
                     <div class="mgt-20">
-                        <mt-button type="primary" size="large" :disabled="commitFlag" @click="commit(repayObj.periodAmount,repayObj.lowestRepayment,repayObj.taskId,repayObj.bankCardId)">确认还款</mt-button>
+                        <mt-button type="primary" size="large" :disabled="commitFlag" @click="commit(repayObj.periodAmount,repayObj.lowestRepayment,repayObj.taskId)">确认还款</mt-button>
                     </div>
-                </section>
+                </div>
             </div>
-            <router-view></router-view>
+            <div class="no-data-msg" v-if="!hasData">
+                <div class="ds-table">
+                    <div class="ds-tell"><img src="/thz/static/load.png" class="loop" width="22"></div>
+                </div>
+            </div>
+
+            <router-view />
         </div>
     </transition>
 </template>
@@ -42,32 +48,26 @@
     import VHeader from '@/components/header'
     import api from '@/fetch/api'
     export default {
-    	name: 'page-repayment',
         components: { VHeader },
         data() {
 			return {
-                name : "",
                 commitFlag : false,
-                no : "",
-                userInfo : "",
+                hasData : false,
+                repayMoney : "",
+                disabled : false,
                 isLess :"",
                 repayObj : {}
             }
 		},
 		mounted() {
-            if(sessionStorage.getItem('bankCardId1')){
-                sessionStorage.removeItem('bankCardId1');
-            }
             this.initData();
 		},
 		methods : {
 			initData(){
                 let _self = this;
-                this.userInfo =JSON.parse(localStorage.getItem("userInfo"));
                 api.bankInfoList({}).then(res=>{
-					var userBankCardId=res.body[0].bankcardId;
 					if(res.code == 200){						
-		                api.repaymentpre({periodNum:sessionStorage.getItem("periodNum"),userBankCardId:userBankCardId }).then(res=>{		                    
+		                api.repaymentpre({periodNum:sessionStorage.getItem("periodNum"),userBankCardId:res.body[0].bankcardId }).then(res=>{		                    
 		                    if(res.code=="500"){
 		                    	layer.open({
 			                        content: res.msg
@@ -77,12 +77,11 @@
 		                    }
 		                    if(res.code=="200"){ 
 		                    	_self.repayObj = res.body;
-                                $(".yinhuan1").val(res.body.periodAmount);
-		                    	var periodAmount=res.body.periodAmount;
-		                    	var lowestRepayment=res.body.lowestRepayment;
-		                    	this.isLess = parseFloat(periodAmount) <= parseFloat(lowestRepayment);
+                                _self.repayMoney = res.body.periodAmount;
+                                _self.hasData = true;
+		                    	_self.isLess = Number(res.body.periodAmount) <= Number(res.body.lowestRepayment);
 								if(this.isLess) {				
-							      $(".yinhuan1").attr("disabled", "disabled");
+							        this.disabled = true;
 							    }
 		                    }
 		                })
@@ -92,17 +91,23 @@
             toBack(){
                 this.$router.back();
             },
-            commit(periodAmount,lowestRepayment,taskId,bankCardId1){
+            clearText(){
+                this.repayMoney = "";
+                this.lst();
+            },
+            resetText(){
+                this.repayMoney = this.repayMoney?this.repayMoney:this.repayObj.periodAmount;
+                this.lst();
+            },
+            lst(){
+                this.commitFlag = this.repayMoney?false:true;
+            },
+            commit(periodAmount,lowestRepayment,taskId){
             	let _this = this;
-            	var bankCardId = sessionStorage.getItem('bankCardId1');
-				var repayMoney = _this.isLess ? periodAmount : $(".repayment-wrap .yinhuan1").val();
-				if(!bankCardId) {
-					bankCardId = bankCardId1;
-				}
 				// 应还金额大于最低还款金额 
 				if(!_this.isLess){
 					// 输入还款金额大于当期应还金额
-					if(parseFloat(repayMoney) > parseFloat(periodAmount)){
+					if(Number(this.repayMoney) > Number(periodAmount)){
 						layer.open({
 	                        content:'还款金额不得大于最高还款金额' + periodAmount + '元'
 	                        ,skin: 'msg'
@@ -111,19 +116,17 @@
 						return false;
 					}
 					// 输入还款金额小于当期应还金额
-					if(parseFloat(repayMoney) < parseFloat(lowestRepayment)){
+					if(Number(this.repayMoney) < Number(lowestRepayment)){
 						layer.open({
 	                        content:'还款金额不得小于最低还款金额' + lowestRepayment + '元'
 	                        ,skin: 'msg'
 	                        ,time: 2 
 	                    });
-						
 						return false;
 					}
 				}
-                
-                if(repayMoney){
-                    let early = parseFloat(repayMoney)+"";
+                if(this.repayMoney){
+                    let early = Number(this.repayMoney)+"";
                     if(early.indexOf(".")!=-1){
                         let regu = "^[0-9]+[\.][0-9]{0,2}$";   
                         let re = new RegExp(regu);   
@@ -146,22 +149,12 @@
                 }
                 let params = {                    
                     taskId : taskId,
-                    bankCardId : bankCardId,
-                    periodNum : sessionStorage.getItem("periodNum"),
-                    repayMoney : repayMoney                   
+                    bankCardId : this.repayObj.bankCardId,
+                    periodNum : sessionStorage.periodNum,
+                    repayMoney : this.repayMoney                   
                 }
                 this.commitFlag = true;
                 api.askrepay(params).then(res=>{
-                    if(res.code=="500"){
-                    	layer.open({
-	                        content: res.msg
-	                        ,skin: 'msg'
-	                        ,time: 2 ,
-	                        end:function(){
-	                        	this.initData();
-	                        }
-	                    });
-                    }
                     if(res.code=="200"){
 	                    layer.open({
 	                        content: res.msg
@@ -172,13 +165,20 @@
 	                        	_this.$parent.loadData();
 	                        }
 	                    });
+                    }else{
+                        layer.open({
+                            content: res.msg
+                            ,skin: 'msg'
+                            ,time: 2 
+                        });
+                        this.commitFlag = false;
                     }
                 })
             },
             chooseCard(e){
                 sessionStorage.setItem("bankCardId",e.params);
                 sessionStorage.setItem("hk-type","repay");
-                this.$router.push({name : "bankcard"});
+                this.$router.push("/repay/bankcard");
             },
             modifyCard(obj){
             	sessionStorage.setItem('bankCardId1',obj.bankCardId)
@@ -194,11 +194,13 @@
     }
 </script>
 <style lang="scss">
-    $color:#F45051;
+    @import '../../assets/scss/mixin';
+    @import '../../assets/scss/color';
     .page-repayment{
+        background-color: $text-white-color;
        .mint-header {
-            background-color: $color;
-            color: #fff;
+            background-color: $theme-bg-color;
+            color: $text-white-color;
             border: none;
             border-bottom:none;
             height:41px;
@@ -207,30 +209,31 @@
             overflow-y:auto; 
         }
         .repay-title{
-            background-color: $color;
-            color:#fff;
+            background-color: $theme-bg-color;
+            color:$text-white-color;
             padding:40px 0 40px 20px;
         }
         .w-60{
             width:60px;
         }
         .more-icon{
-            background: url("/thz/static/href.png") scroll 98% 50% no-repeat;
+            background: url("/thz/static/href.png") scroll 94% 50% no-repeat;
             background-size: 20px;
-            background-color: #fff;
+            background-color: $text-white-color;
         }
         .repay-card{
             border-top-left-radius:10px;
             border-top-right-radius:10px;
-            background:#fff;
+            background:$text-white-color;
             margin-top:-22px;
             width:100%;
         }
         .item{
-            -box-shadow: 1px 1px 1px gray;
+            -box-shadow: 0px 2px 5px gray;
             -webkit-box-shadow: 0px 2px 5px gray;
-            margin-bottom: 10px;
-            border-radius:6px;
+            margin-bottom: px2rem(14);
+            border-radius:px2rem(6);
+            padding: 0 px2rem(10);
         }
         .blue-font{
             color:#000;
@@ -241,7 +244,7 @@
         .mint-cell-value{
         	margin-right: 10px;
         }
-        .yinhuan1{
+        .repay-money{
         	background: rgba(0,0,0,0);
         	border: none;
         	text-align: right;

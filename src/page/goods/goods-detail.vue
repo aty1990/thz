@@ -1,86 +1,108 @@
 <template>
-    <transition>
-    	<div class="page-animate page-goods-detail">
-            <v-header>
-                <mt-header :title="title">
-                    <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack"></mt-button>
-                    </div>
-                </mt-header>
-            </v-header>
-            <div class="wrapper goods-wrap">
-                <div class="white-bg pdb-6">
-                    <div class="goods-content">
-                        <mt-swipe :auto="0" :show-indicators="false"  @change="handleChange">
-                            <mt-swipe-item v-for="icon in goodsData.goods_pic" :key="">
-                                <img :src="icon.picUrl" width="100%">
-                            </mt-swipe-item>
-                        </mt-swipe>
-                        <p class="flex swipe-index"><span>{{currentIdx}}/{{totalNumber}}</span></p>
-                    </div>
-                    <div class="price mgt-5 mgb-5 flex text-left">
-                        <div class="pdl-6 font-size-24">￥{{goodsData.goodsAmount}}</div>
-                    </div>
-                    <div class="pdl-10 font-size-15">{{goodsData.goodsName}}</div> 
-                    <div class="pdl-10 mgt-5 mgb-5 font-size-12 goods-title">{{goodsData.goodsTitle}}</div> 
-                </div>
-               <!--  <div class="flex pdb-6 addr-wrap text-left">
-                   <span class="flex"><span style="width:50px;margin-left:10px;">配送至</span><img src="/thz/static/icon-addr.png" width="12"></span>
-                   <span class="text-deal mgl-6" v-show="addrObj.deliveryArea" @click="addAddr">{{addrObj.deliveryArea}} {{addrObj.deliveryAddress}}</span>
-                   <span class="text-deal mgl-6" v-show="!addrObj.deliveryArea" @click="addAddr">请添加收货地址</span>
-               </div> -->
-                <div class="flex pdb-6 addr-wrap text-left">
-                   <span class="flex grow text-left pdl-10" @click="showMsg"><span class="mgr-6">分期支付</span><img src="/thz/static/sprity/msg.png" width="16"/></span>
-                   <span class="flex week-number pdr-10">周供￥{{goodsData.goods_periodnum}}*{{goodsData.repayPerPeriods}}期</span>
-                </div> 
-                <div class="img-box mgt-10">
-                    <p class="pdt-10 pdb-10 pdl-10 white-bg">商品详情</p>
-                    <div v-html="goodsData.goodsDetail"></div>
-                </div> 
-                <footer class="fixed-btm-btn flex">
-                    <table class="footer-table">
-                        <tr>
-                            <td class="footer-item has-border1" @click="tohome"><img src="/thz/static/icon-home.png" width="16" /></td>
-                            <td class="footer-item has-border1" @click="share"><img src="/thz/static/icon-share.png" width="16" /></td>
-                            <td class="footer-item" @click="kefu"><img src="/thz/static/icon-kefu.png" width="16" /></td>
-                            <td>
-                                <mt-button type="primary" v-if="!userStat || userStat==0 || userStat==8 || (userStat==2 && rejectFlag)" size="large" class="font-size-14" @click="shopping">分期购买</mt-button>
-                                <mt-button type="primary" v-if="userStat==1 || userStat==3" size="large" class="font-size-14" @click="gotoprogress">查看分期进度</mt-button>
-                                <mt-button type="primary" v-if="userStat==4 || (userStat==2 && !rejectFlag)" size="large" class="font-size-14" :disabled="disflag">去支付</mt-button>
-                            </td>
-                        </tr>
-                    </table>
-                </footer>
-
+    <div>
+        <transition>
+            <div class="page-animate page-goods-detail">
+                <v-header ref="header" class="detail-header">
+                    <mt-header :title="title">
+                        <div slot="left">
+                            <mt-button  icon="back" @click.native="toBack"></mt-button>
+                        </div>
+                    </mt-header>
+                </v-header>
+                <template v-if="goodsData.goodsAmount">
+                    <vue-better-scroll class="wrapper" ref="scroll"
+                        :listenScroll="listenScroll"
+                        :probeType="probeType"
+                        @scroll="scroll">
+                        <div class="white-bg pdb-6">
+                            <div class="goods-content">
+                                <mt-swipe :auto="0" :show-indicators="false"  @change="handleChange">
+                                    <mt-swipe-item v-for="icon in goodsData.goods_pic" :key="" @click.native="previewImg(icon.picUrl)">
+                                        <img :src="icon.picUrl" width="100%" >
+                                    </mt-swipe-item>
+                                </mt-swipe>
+                                <p class="flex swipe-index"><span>{{currentIdx}}/{{totalNumber}}</span></p>
+                            </div>
+                            <div class="price mgt-5 mgb-5 flex text-left">
+                                <div class="pdl-6 font-size-24">￥{{goodsData.goodsAmount}}</div>
+                            </div>
+                            <div class="pdl-10 font-size-15">{{goodsData.goodsName}}</div> 
+                            <div class="pdl-10 mgt-5 mgb-5 font-size-12 goods-title">{{goodsData.goodsTitle}}</div> 
+                        </div>
+                        <div class="flex pdt-10 pdb-10 addr-wrap text-left" v-if="goodsData.isLoan==0">
+                           <span class="flex grow text-left"><span style="width:50px;margin-left:10px;">配送至</span><img src="/thz/static/icon-addr.png" width="12"></span>
+                           <span class="text-deal1 mgr-10 mgl-4" v-show="addrObj.deliveryArea" @click="addAddr">{{addrObj.deliveryArea}} {{addrObj.deliveryAddress}}</span>
+                           <span class="text-deal mgr-10" v-show="!addrObj.deliveryArea" @click="addAddr">请添加收货地址</span>
+                           <span class="mgr-10"><img src="/thz/static/icon_jiantou@2x.png" width="8" /></span>
+                       </div> 
+                        <div class="flex pdt-10 pdb-10 addr-wrap text-left" v-if="goodsData.isLoan==1">
+                            <span class="flex grow text-left pdl-10" @click="showMsg">
+                                <span class="mgr-6 mgt-4">分期支付</span>
+                                <img src="/thz/static/sprity/msg.png" width="16"/>
+                            </span>
+                            <span class="flex week-number pdr-10">周供￥{{goodsData.repayPerPeriods}}&nbsp;*&nbsp;{{goodsData.goods_periodnum}}期</span>
+                        </div> 
+                        <div class="img-box mgt-10">
+                            <p class="pdt-10 pdb-10 pdl-10 white-bg">商品详情</p>
+                            <div class="white-bg" v-html="goodsData.goodsDetail"></div>
+                        </div> 
+                    </vue-better-scroll>
+                    <footer class="fixed-btm-btn flex">
+                        <table class="footer-table">
+                            <tr>
+                                <td class="footer-item has-border1" @click="tohome"><img src="/thz/static/icon-home.png" width="16" /></td>
+                                <td class="footer-item has-border1" @click="share"><img src="/thz/static/icon-share.png" width="16" /></td>
+                                <td class="footer-item" @click="kefu"><img src="/thz/static/icon-kefu.png" width="16" /></td>
+                                <td v-if="goodsData.isLoan==1">
+                                    <mt-button type="primary" v-if="userStat==1 || userStat==3" size="large" class="font-size-14" @click="gotoprogress">查看分期进度</mt-button>
+                                    <mt-button type="primary" size="large" v-else @click="shopping">分期购买</mt-button>
+                                </td>
+                                <td v-else>
+                                    <mt-button v-if="Number(goodsData.stock)>0" type="primary" size="large" @click="purchase">立即购买</mt-button> 
+                                    <mt-button v-else type="primary" size="large" class="over">已售罄</mt-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </footer>
+                </template>
+                <div class="mask" v-show="shareFlag" @click="hidePop"></div>
                 <div class="to-top-scroll" @click="toTop" v-show="toTopFlag"></div>
+                <div class="share-pop"  v-show="shareFlag"><img src="/thz/static/share-icon.png" width="70%"></div>
+                <div class="no-data-msg" v-if="!goodsData.goodsAmount">
+                    <div class="ds-table">
+                        <div class="ds-tell"><img src="/thz/static/load.png" class="loop" width="22"></div>
+                    </div>
+                </div>
             </div>
-            <div class="mask" v-show="shareFlag" @click="hidePop"></div>
-            <div class="share-pop"  v-show="shareFlag"><img src="/thz/static/share-icon.png" width="70%"></div>
-            <router-view />
-        </div>
-    </transition>
+        </transition>
+        <router-view />
+    </div>
 </template>
 <script>
     import VHeader from '@/components/header'
-    import {getCookie} from '@/assets/js/tool'
+    import {getCookie} from '@/assets/js/tool' 
+    import VueBetterScroll from 'vue2-better-scroll' 
     import Vue from 'vue';
     import api from '@/fetch/api'
     export default {
     	name: 'page-goods-detail',
-        components: { VHeader },
+        components: { VHeader, VueBetterScroll},
         data() {
 			return {
-				goodsData : "",
+				goodsData : {},
                 userStat :"",
                 disflag : true,
                 title : "商品详情",
+                listenScroll : true,
+                probeType : 3,
                 currentIdx : 1,
                 totalNumber : 0,
                 addrObj : {},
                 layerObj : "",
                 rejectFlag : true,
                 shareFlag : false,
-                toTopFlag : false
+                toTopFlag : false,
+                imgArr : []
 			}
 		},
         mounted(){
@@ -104,10 +126,6 @@
             $("body").on("click",".ok-btn",()=>{
                 layer.close(this.layerObj);
             });
-            // 判断是否显示回到顶部的按钮
-            $(".goods-wrap").scroll(function(){
-                _self.toTopFlag = $(this).scrollTop()>400?true:false;
-            })
         },
 		methods : {
             toBack(){
@@ -119,27 +137,45 @@
             },
             initData(){
                 let _self = this;
-                api.goodsDetail({id:_self.$route.query.goodsId}).then(res=>{
+                let goodsId = _self.$route.query.goodsId;
+                api.goodsDetail({id:goodsId?goodsId:sessionStorage.goodsId}).then(res=>{
                     if(res.code=="200"){
                         _self.goodsData = res.body;
+                        _self.addrObj = res.body.address?res.body.address:{};
                         _self.totalNumber = res.body.goods_pic.length;
                         _self.title = res.body.goodsName;
                         _self.$nextTick(()=>{
-                            // 根据sessionStorage取值判断 ps这里不能取this.$route.query里的term 以防子页面跳转到当前页this.$route.query里不存在此参数
-                            if(!sessionStorage.getItem("term")){
-                                // 微信就获取地理位置坐标 安卓不获取
-                                let thisUrl = location.href.split('#')[0];
-                                // 获取微信签名
-                                api.getWxSign({url:thisUrl}).then(res=>{
-                                    if(res.code=="200"){
-                                        _self.getWx(res);
-                                    }
-                                })
-                            }else{
-                                console.log("来着安卓 or ios的访问请求");
-                            }
-                        })
 
+                            // 根据sessionStorage取值判断 ps这里不能取this.$route.query里的term 以防子页面跳转到当前页this.$route.query里不存在此参数
+                            wx.onMenuShareAppMessage({
+                                title: _self.goodsData.goodsName, // 分享标题
+                                desc: _self.goodsData.goodsTitle, // 分享描述
+                                link: location.href.split('#')[0]+'#'+location.href.split('#')[1], 
+                                imgUrl: _self.goodsData.goods_picurl, // 分享图标
+                                type: '', // 分享类型,music、video或link，不填默认为link
+                                dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+                                success: function () {
+                                    _self.shareFlag = false;
+                                }
+                            });
+                            wx.onMenuShareTimeline({
+                                title: _self.goodsData.goodsName, // 分享标题
+                                link: location.href.split('#')[0]+'#'+location.href.split('#')[1], 
+                                // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+                                imgUrl: _self.goodsData.goods_picurl, // 分享图标
+                                success: function () {
+                                    _self.shareFlag = false;
+                                }
+                            });
+                            if(_self.goodsData.goods_pic){
+                                _self.goodsData.goods_pic.map((item)=>{
+                                    _self.imgArr.push(item.picUrl);
+                                });
+                            }   
+                        })
+                        setTimeout(()=>{
+                            _self.$refs.scroll.refresh();
+                        },500);
                     }else if(res.code=="111"){
                         // 判断安卓和微信
                         if(!sessionStorage.getItem("term")){
@@ -154,7 +190,7 @@
 	                        ,time: 2	                            
 	                    });
                     }
-                })
+                });
             },
             shopping(){ 
                 this.verfiy(()=>{ this.gotoplay();});
@@ -188,6 +224,9 @@
             tohome(){
                 this.$router.replace("/home");
             },
+            toTop(){
+                this.$refs.scroll.scrollTo(0,0,300);
+            },
             kefu(){
                 let _self = this;
                 this.verfiy(()=>{
@@ -206,45 +245,14 @@
                     }
                 });
             },
+            previewImg(current){
+                wx.previewImage({
+                    current: current, // 当前显示图片的http链接
+                    urls: this.imgArr // 需要预览的图片http链接列表
+                });
+            },
             gotoprogress(){
                 this.verfiy(()=>{ this.$router.push({path:"/home/progress"});});
-            },
-            getWx(res){
-                let _self = this;
-                let appId = res.body.appid;
-                let nonceStr = res.body.noncestr;
-                let signature = res.body.signature;
-                let timestamp = res.body.timestamp;
-                wx.config({
-                    debug: false,
-                    appId: appId,
-                    timestamp: timestamp,
-                    nonceStr: nonceStr,
-                    signature: signature,
-                    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage']
-                });
-                wx.ready(function() {
-                    wx.onMenuShareAppMessage({
-                        title: _self.goodsData.goodsName, // 分享标题
-                        desc: _self.goodsData.goodsTitle, // 分享描述
-                        link: location.href+"&type=out", // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                        imgUrl: _self.goodsData.goods_picurl, // 分享图标
-                        type: '', // 分享类型,music、video或link，不填默认为link
-                        dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
-                        success: function () {
-                            _self.shareFlag = false;
-                        }
-                    });
-
-                    wx.onMenuShareTimeline({
-                        title: _self.goodsData.goodsName, // 分享标题
-                        link: location.href+"&type=out", // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-                        imgUrl: _self.goodsData.goods_picurl, // 分享图标
-                        success: function () {
-                            _self.shareFlag = false;
-                        }
-                    })
-                })
             },
             share(){
                 this.shareFlag = true;
@@ -255,8 +263,17 @@
             handleChange(index){
                 this.currentIdx = ++index;
             },
-            toTop(){
-                $(".goods-wrap").animate({scrollTop:0}, 500);
+            scroll(o){
+                let y =  Math.abs(o.y);
+                let header = this.$refs.header.$el;
+                this.toTopFlag = y>400?true:false;
+                if(y>200){
+                    header.style.top = "-40px"; 
+                    header.style.opacity = 0; 
+                }else{
+                    header.style.top = "0px";
+                    header.style.opacity = 1; 
+                }
             },
             showMsg(){
                 this.layerObj = layer.open({
@@ -284,9 +301,6 @@
                 if(userStat=="1" || userStat=="3"){
                     _self.$router.push({name:"progress"})
                 }
-                if(userStat=="4" || userStat=="5" ){
-                    _self.$router.push({name:"fqzd"})
-                }   
                 // 判断拒绝时间是否大于90天
                 if(localStorage.rejectTime){
                     let currentDate = new Date();
@@ -295,7 +309,7 @@
                     let day = currentDate.getDate()<10?"0"+currentDate.getDate():currentDate.getDate();
                     _self.rejectFlag = new Date(year +"/"+ month +"/"+ day).getTime()>new Date(localStorage.rejectTime).getTime();
                 }
-                if(userStat=="0" || userStat=="8" || (userStat=="2" && rejectFlag)){
+                if(userStat=="0" || userStat=="8" || (userStat=="2" && _self.rejectFlag)){
                     if(_self.goodsData.isLoan == "1"){
                         api.submitOrder({
                             goodsId : sessionStorage.getItem("goodsId"),                // 商品Id
@@ -338,20 +352,63 @@
                         ,time: 2                                
                     });
                 }
+            },
+            purchase(){
+                let _self = this;
+                _self.verfiy(()=>{
+                    if($.isEmptyObject(this.addrObj)){
+                        layer.open({
+                            content: "收货地址不能为空" 
+                            ,skin: 'msg'
+                            ,time: 2                                
+                        });
+                    }else{
+                        api.submitOrder({
+                            goodsId : sessionStorage.getItem("goodsId"),                // 商品Id
+                            addressId : _self.addrObj.id,                               // 收货地址Id
+                            payType :  "W",                                             // 支付方式
+                            periodNum : _self.goodsData.goods_periodnum,                // 分期时间
+                            isLoan : "0"
+                        }).then(res=>{
+                            if(res.code == "200"){ 
+                                this.$router.push({
+                                    path : "/home/goods/detail/wxpay"
+                                });                  
+                            }else if(res.code=="111"){
+                                
+                            }else{
+                                layer.open({
+                                    content: res.msg
+                                    ,skin: 'msg'
+                                    ,time: 2                                
+                                });
+                            }
+                        })
+                    }
+                });
             }
         }
     }
 </script>
 
-<style lang="scss">
+<style lang="scss" scope>
     @import '../../assets/scss/mixin';
     $color : #F45051;
     .page-goods-detail{
         .mint-button{
             height: 45px;
         }
+        .detail-header{
+            transition: all 0.2s ease;
+            position: absolute;
+            top:0;
+            left:0;
+            z-index: 1;
+        }
         .wrapper{
-            overflow-y:auto; 
+            top:0;
+            padding-top: px2rem(40);
+            bottom: px2rem(43);
         }
         .goods-content{
             height: px2rem(370);
@@ -452,7 +509,7 @@
         position: absolute;
         bottom: px2rem(10);
         left:0;
-        z-index: 99;
+        z-index: 9;
         width:100%;
         span{
             display:block;
@@ -472,6 +529,9 @@
         background-size:px2rem(48);
         bottom: px2rem(60);
         right:px2rem(20);
-        z-index: 99;
+        z-index: 9;
+    }
+    .over{
+        background: #9198A3;
     }
 </style>

@@ -388,7 +388,7 @@ input.weui_btn_plain_default {
 	transform-origin: 0 0;
 	-webkit-transform: scaleY(.5);
 	transform: scaleY(.5);
-	left: 15px
+	left: 0;
 }
 
 .weui_cell:first-child:before {
@@ -2232,4 +2232,25 @@ input[type=search]::-webkit-search-decoration,
 input[type=search]::-webkit-search-results-button,
 input[type=search]::-webkit-search-results-decoration {
 	display: none
+}
+.weui-cell__ft {
+    padding-right: 13px;
+    position: relative;
+}
+.weui-cell__ft:after {
+    content: " ";
+    display: inline-block;
+    height: 6px;
+    width: 6px;
+    border-width: 2px 2px 0 0;
+    border-color: #C8C8CD;
+    border-style: solid;
+    -webkit-transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
+    transform: matrix(0.71, 0.71, -0.71, 0.71, 0, 0);
+    position: relative;
+    top: -2px;
+    position: absolute;
+    top: 50%;
+    margin-top: -4px;
+    right: 2px;
 }

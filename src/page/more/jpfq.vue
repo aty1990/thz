@@ -4,11 +4,11 @@
 		 	<v-header>
 	            <mt-header title="精品分期">
 	                <div slot="left">
-	                    <mt-button icon="back" @click.native="toBack">返回</mt-button>
+	                    <mt-button icon="back" @click.native="toBack"></mt-button>
 	                </div>
 	            </mt-header>
 	        </v-header>	
-	        <vue-better-scroll class="wrapper" >
+	        <vue-better-scroll class="wrapper" v-if="hasData">
 		        <div class="broadcast" @click="goBanner(jxhd_banners.bannerLinkUrl)">
 		        	<a href="javascript:;"><img :src="jxhd_banners.bannerPicUrl" width="100%"></a>
 		        </div>
@@ -23,11 +23,17 @@
 						<div class="pdt-20 pdb-10 min-he-100">
 							<img v-lazy="goods.goodsPicurl" width="90%" style="margin-left: 5%;">
 						</div>
-						<h5 class="text-deal">{{goods.goodsName}}</h5>
-						<div class="price">￥{{goods.goodsAmount}}</div>
+						<h5 class="text-deal1">{{goods.goodsName}}</h5>
+						<div class="price">￥{{goods.goodsAmount}}</div> 
 					</div>
 				</div>	
 	        </vue-better-scroll>
+
+	        <div class="no-data-msg" v-show="!hasData">
+				<div class="ds-table">
+					<div class="ds-tell"><img src="/thz/static/load.png" class="loop" width="22"></div>
+				</div>
+			</div>
 			
 			<div class="full-page" v-show="sendcode">
                 <div class="mask" @click.stop="closePop"></div>
@@ -58,10 +64,11 @@
 				active : 0,
 				loan_goods : [],
 				goodsSalesFlag : "up",
+				hasData : false,
 				goodsAmountFlag : "up",
 				sendcode : false,
 				sortparam : "",
-				sorttype : "asc",
+				sorttype : "desc",
 				jxhd_banners : {},
 				isnew : ""
 			}
@@ -99,6 +106,9 @@
 	        		if(res.code=="200"){
 	        			this.jxhd_banners = res.body.jpfq_banners[0];
 	        			this.loan_goods = res.body.page.data;
+	        			this.$nextTick(()=>{
+	        				this.hasData = true;
+	        			})
 	        		}else{
 	        			layer.open({
 		                    content: res.msg
@@ -158,6 +168,7 @@
 			isNew(){
 				this.active = 3;
 				this.isnew = "1";
+				this.sortparam = "";
 				this.goodsAmountFlag = "up";
 				this.goodsSalesFlag = "up";
 				this.getData();

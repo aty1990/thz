@@ -4,7 +4,7 @@
             <v-header>
                 <mt-header :title="title">
                     <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                        <mt-button  icon="back" @click.native="toBack"></mt-button>
                     </div>
                 </mt-header>
             </v-header>
@@ -65,15 +65,15 @@
             margin: 0px;
         }
         .search-box{
-            position: fixed;
+            position: absolute;
             width: 100%;
             background: #fff;
             height: 40px;
             line-height: 40px;
             text-align: center;
-            top:40px;
+            top:0px;
             left: 0;
-            z-index: 9999999;
+            z-index: 9999;
             input{
                 padding: 3px;
                 outline: none;

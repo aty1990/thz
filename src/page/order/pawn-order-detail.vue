@@ -58,7 +58,7 @@
             },
             initData(){
                 let _self = this;
-                api.pawnOrderDetail({orderId:sessionStorage.getItem("pawnOrderId")}).then(res=>{
+                api.pawnOrderDetail({orderId:sessionStorage.getItem("pawnOrderId"),isLoan:"1"}).then(res=>{
                     _self.pawnObj = res.body;
                 })
             },

@@ -4,7 +4,7 @@
             <v-header>
                 <mt-header title="联系人信息">
                     <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                        <mt-button  icon="back" @click.native="toBack"></mt-button>
                     </div>
                 </mt-header>
             </v-header>
@@ -51,11 +51,11 @@
     				<mt-button type="primary" size="large" :disabled="saveBtn"  @click.stop="save">保存</mt-button>
     			</div>
                 <!-- 发薪日期控件 begin -->
-                <vue-pickers :show="items1Flg" :selectData="items1" v-on:cancel="close" v-on:confirm="confirmFn"></vue-pickers>
+                <vue-pickers :show="items1Flg" :selectData="items1" :defaultData="defaultData1" v-on:cancel="close" v-on:confirm="confirmFn"></vue-pickers> 
                 <div class="mask" v-show="items1Flg"></div>
                 <!-- 发薪日期控件 end -->
                  <!-- 发薪日期控件 begin -->
-                <vue-pickers :show="items2Flg" :selectData="items2" v-on:cancel="close" v-on:confirm="confirmFn"></vue-pickers>
+                <vue-pickers :show="items2Flg" :selectData="items2" :defaultData="defaultData2" v-on:cancel="close" v-on:confirm="confirmFn"></vue-pickers>
                 <div class="mask" v-show="items2Flg"></div>
                 <!-- 发薪日期控件 end -->
             </div>
@@ -76,8 +76,15 @@
                 items1Flg : false,
                 items2Flg : false,
                 currentIdx : 0,
+                columns: 1,
                 relationShip1Id : "",
                 relationShip2Id : "",
+                defaultData1 : [
+                    { text: "",value: "" }
+                ],
+                defaultData2 : [
+                    { text: "",value: "" }
+                ],
                 paramsObj : {
                     item1Text : "", 
                     item2Text : "",
@@ -87,12 +94,10 @@
                     tel2 : ""
                 },
                 items1: {
-                    columns: 1,
-                    pData1: []
+                    data1: []
                 },
                 items2: {
-                    columns: 1,
-                    pData1: []
+                    data1: []
                 }
             }
         },
@@ -109,14 +114,17 @@
             api.detailContact({userId:this.userId}).then(res=>{
             	if(res.code == 200){
 	                _self.paramsObj.item1Text = res.body.relationShip1;
+                    _self.defaultData1[0].text = res.body.relationShip1;
 	                _self.paramsObj.item2Text = res.body.relationShip2;
+                    _self.defaultData2[0].text = res.body.relationShip2;
 	                _self.paramsObj.name1 = res.body.relationName1;
 	                _self.paramsObj.name2 = res.body.relationName2;
 	                _self.paramsObj.tel1 = res.body.relationMob1;
 	                _self.paramsObj.tel2 = res.body.relationMob2;
-	                _self.relationShip1Id = res.body.relationShip1Id;
-	                _self.relationShip2Id = res.body.relationShip2Id;
-
+                    _self.relationShip1Id = res.body.relationShip1Id;
+	                _self.defaultData1[0].value = res.body.relationShip1Id;
+                    _self.relationShip2Id = res.body.relationShip2Id;
+                    _self.defaultData2[0].value = res.body.relationShip2Id;
                     if(Math.floor(sessionStorage.getItem("contact"))==1){
                         setTimeout(()=>{
                             _self.saveBtn = true;
@@ -127,7 +135,7 @@
                     if(!sessionStorage.getItem("term")){
                         // 判断安卓和微信
                         if(!sessionStorage.getItem("term")){
-                            window.location.href='${project.domain}/index';
+                            location.replace(location.origin+'/thz/index');
                         }else{
                             _self.$router.push("/login")
                         }
@@ -144,15 +152,15 @@
             })
 
             api.selectinfo({type:"100004"}).then(res=>{
-                _self.items1.pData1 = [];
+                _self.items1.data1 = [];
                 $.each(res.body,function(i,ele){
-                    _self.items1.pData1.push({text: ele.value,value: ele.key});
+                    _self.items1.data1.push({text: ele.value,value: ele.key});
                 })
             })
             api.selectinfo({type:"100005"}).then(res=>{
-                _self.items2.pData1 = [];
+                _self.items2.data1 = [];
                 $.each(res.body,function(i,ele){
-                    _self.items2.pData1.push({text: ele.value,value: ele.key});
+                    _self.items2.data1.push({text: ele.value,value: ele.key});
                 })
             })
         },
@@ -180,18 +188,8 @@
             	if(sessionStorage.getItem('contact') != '2'){
 	            	if(type == 1){
 	            		_this.items1Flg = true;
-                        setTimeout(()=>{
-                            $(".contacts-wrap .area_province").attr("top",this.provinceOne).css({"-webkit-transform":"translate3d(0,"+this.provinceOne+",0)"});
-                            $(".contacts-wrap .area_city").attr("top",this.cityOne).css({"-webkit-transform":"translate3d(0,"+this.cityOne+",0)"});
-                            $(".contacts-wrap .area_county").attr("top",this.countyOne).css({"-webkit-transform":"translate3d(0,"+this.countyOne+",0)"});
-                        },100)
 	            	}else{
 	            		_this.items2Flg = true;
-                        setTimeout(()=>{
-                            $(".contacts-wrap .area_province").attr("top",this.provinceTwo).css({"-webkit-transform":"translate3d(0,"+this.provinceTwo+",0)"});
-                            $(".contacts-wrap .area_city").attr("top",this.cityTwo).css({"-webkit-transform":"translate3d(0,"+this.cityTwo+",0)"});
-                            $(".contacts-wrap .area_county").attr("top",this.countyTwo).css({"-webkit-transform":"translate3d(0,"+this.countyTwo+",0)"});
-                        },100)
 	            	}
 	                _this.currentIdx = type;
                 }
@@ -207,15 +205,14 @@
                 if(this.currentIdx==1){
                     this.paramsObj.item1Text = e['select1'].text;
                     this.relationShip1Id = e['select1'].value;
-                    this.provinceOne = $(".contacts-wrap .area_province").attr("top");
-                    this.cityOne = $(".contacts-wrap .area_city").attr("top");
-                    this.countyOne = $(".contacts-wrap .area_county").attr("top");
+                    this.defaultData1[0].text = e['select1'].text;
+                    this.defaultData1[0].value = e['select1'].value;
                 }else{
                     this.paramsObj.item2Text = e['select1'].text;
                     this.relationShip2Id = e['select1'].value;
-                    this.provinceTwo = $(".contacts-wrap .area_province").attr("top");
-                    this.cityTwo = $(".contacts-wrap .area_city").attr("top");
-                    this.countyTwo = $(".contacts-wrap .area_county").attr("top");
+                    this.defaultData2[0].text = e['select1'].text;
+                    this.defaultData2[0].value = e['select1'].value;
+                   
                 }
                 this.close();
             },
@@ -253,7 +250,7 @@
                             }else if(res.code=="111"){
 		                        // 判断安卓和微信
                                 if(!sessionStorage.getItem("term")){
-                                    window.location.href='${project.domain}/index';
+                                    location.replace(location.origin+'/thz/index');
                                 }else{
                                     _self.$router.push("/login")
                                 }
@@ -343,7 +340,6 @@
     }
     input:disabled, input[disabled]{ 
         color: #000; 
-        -webkit-text-fill-color:#000; 
         -webkit-opacity:1; 
         opacity: 1; 
     }

@@ -4,7 +4,7 @@
 			<v-header>
 				<mt-header title="个人信息">
 					<div slot="left">
-						<mt-button icon="back" @click.native="toBack">返回</mt-button>
+						<mt-button icon="back" @click.native="toBack"></mt-button>
 					</div>
 				</mt-header>
 			</v-header>
@@ -53,12 +53,14 @@
 	                <mt-button type="primary" size="large" :disabled="saveBtn" @click.stop="saveInfo">保存</mt-button>
 	            </div>
 	            <!--  选择学历 begin-->
-	            <vue-pickers :show="chooseEduFlag" :selectData="eduArr" v-on:cancel="close('chooseEduFlag')" v-on:confirm="confirmEdu"></vue-pickers>
+	            <vue-pickers :show="chooseEduFlag" :columns="columns" :defaultData="defaultData1" :selectData="eduArr" @cancel="close('chooseEduFlag')" @confirm="confirmEdu"></vue-pickers>
+
+
 				<div class="mask" v-show="chooseEduFlag"></div>
 	            <!--  选择学历 end-->
 
 	            <!--  婚姻状况 begin-->
-	            <vue-pickers :show="chooseMarFlag" :selectData="marArr" v-on:cancel="close('chooseMarFlag')" v-on:confirm="confirmMar"></vue-pickers>
+	            <vue-pickers :show="chooseMarFlag" :columns="columns" :defaultData="defaultData2" :selectData="marArr" @cancel="close('chooseMarFlag')" @confirm="confirmMar"></vue-pickers>
 				<div class="mask" v-show="chooseMarFlag"></div>
 	            <!--  婚姻状况 end-->
 			</div>
@@ -82,8 +84,16 @@
 				saveBtn : true,
 				chooseEduFlag : false,
 				chooseMarFlag : false,
+				defaultData : [],
+				columns : 1,
 				telPrix : "",
 				userId : "",
+				defaultData1 : [
+                    { text: "",value: "" }
+                ],
+                defaultData2 : [
+                    { text: "",value: "" }
+                ],
 				paramsObj : {
 					eduText : "",
 					marryText : "",
@@ -95,14 +105,12 @@
 					address : ""
 				},
                 marArr: {
-				  	columns: 1, // picker的列数
 				  	// 第一列的数据结构
-				  	pData1: []
+				  	data1: []
 				},
                 eduArr: {
-				  	columns: 1, // picker的列数
 				  	// 第一列的数据结构
-				  	pData1: []
+				  	data1: []
 				}
 			}
 		},
@@ -138,15 +146,21 @@
 						_self.paramsObj.province = res.body.province;
 						_self.paramsObj.userName = res.body.userName;
 						_self.paramsObj.eduLvId = res.body.eduLvId;
+						_self.defaultData1[0].value = res.body.eduLvId;
+						_self.defaultData1[0].text = res.body.eduLv;
 						_self.paramsObj.eduText = res.body.eduLv;
 						_self.paramsObj.marryText = res.body.isMarry;
 						_self.paramsObj.isMarryId = res.body.isMarryId;
+
+						_self.defaultData2[0].value = res.body.isMarryId;
+						_self.defaultData2[0].text = res.body.isMarry;
 
 						if(Math.floor(sessionStorage.getItem("person"))==1){
 							setTimeout(()=>{
 								_self.saveBtn = true;
 							},50)
 						}
+
 						if(sessionStorage.getItem('person') == '2'){					
 							$("#addrText").html(res.body.liveAddrUp);
 							$(".street").html(res.body.liveAddrDown);
@@ -154,7 +168,7 @@
 					}else if(res.code=="111"){
                         // 判断安卓和微信
 						if(!sessionStorage.getItem("term")){
-							window.location.href='${project.domain}/index';
+							location.replace(location.origin+'/thz/index');
 						}else{
 							_self.$router.push("/login")
 						}
@@ -168,15 +182,15 @@
 				})
 				// 获取教育信息
 				api.selectinfo({type:"100000"}).then(res=>{
-					_self.eduArr.pData1 = [];
+					_self.eduArr.data1 = [];
 					$.each(res.body,function(i,ele){
-						_self.eduArr.pData1.push({text: ele.value,value: ele.key});
+						_self.eduArr.data1.push({text: ele.value,value: ele.key});
 					})
 				});
 				api.selectinfo({type:"100001"}).then(res=>{
-					_self.marArr.pData1 = [];
+					_self.marArr.data1 = [];
 					$.each(res.body,function(i,ele){
-						_self.marArr.pData1.push({text: ele.value,value: ele.key});
+						_self.marArr.data1.push({text: ele.value,value: ele.key});
 					})
 				})
 			},
@@ -191,11 +205,6 @@
 					this.chooseEduFlag = false;
 				}else{
 					this.chooseEduFlag = true;
-					setTimeout(()=>{
-						$(".page-person .area_province").attr("top",this.provinceEdu).css({"-webkit-transform":"translate3d(0,"+this.provinceEdu+",0)"});
-						$(".page-person .area_city").attr("top",this.cityEdu).css({"-webkit-transform":"translate3d(0,"+this.cityEdu+",0)"});
-						$(".page-person .area_county").attr("top",this.countyEdu).css({"-webkit-transform":"translate3d(0,"+this.countyEdu+",0)"});
-					},100)
 				}
 			},
 			chooseMar(e){
@@ -204,22 +213,15 @@
 					this.chooseMarFlag = false;
 				}else{
 					this.chooseMarFlag = true;
-					// 回显选中的选项
-					setTimeout(()=>{
-						$(".page-person .area_province").attr("top",this.provinceMar).css({"-webkit-transform":"translate3d(0,"+this.provinceMar+",0)"});
-						$(".page-person .area_city").attr("top",this.cityMar).css({"-webkit-transform":"translate3d(0,"+this.cityMar+",0)"});
-						$(".page-person .area_county").attr("top",this.countyMar).css({"-webkit-transform":"translate3d(0,"+this.countyMar+",0)"});
-					},100)
 				}
 			},
 			confirmEdu(e){
 				this.chooseEduFlag = false;
 				this.paramsObj.eduText = e['select1'].text;
 				this.paramsObj.eduLvId = e['select1'].value;
+				this.defaultData1[0].value = e['select1'].value;
+				this.defaultData1[0].text = e['select1'].text;
 				this.lst();
-				this.provinceEdu = $(".page-person .area_province").attr("top");
-				this.cityEdu = $(".page-person .area_city").attr("top");
-				this.countyEdu = $(".page-person .area_county").attr("top");
 			},
 			lst(){
 				this.saveBtn = listenField([
@@ -234,12 +236,9 @@
 				this.chooseMarFlag = false;
 				this.paramsObj.marryText = e['select1'].text;
 				this.paramsObj.isMarryId = e['select1'].value;
+				this.defaultData2[0].value = e['select1'].value;
+				this.defaultData2[0].text = e['select1'].text;
 				this.lst();
-				// 回显选中的选项
-				this.provinceMar = $(".page-person .area_province").attr("top");
-				this.cityMar = $(".page-person .area_city").attr("top");
-				this.countyMar = $(".page-person .area_county").attr("top");
-
 			},
 			close(type){
 				this[type] = false;
@@ -289,7 +288,7 @@
 					}else if(res.code=="111"){
                         // 判断安卓和微信
 						if(!sessionStorage.getItem("term")){
-							window.location.href='${project.domain}/index';
+							location.replace(location.origin+'/thz/index');
 						}else{
 							_self.$router.push("/login")
 						}

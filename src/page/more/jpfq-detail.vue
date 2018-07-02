@@ -8,7 +8,7 @@
 	                </div>
 	            </mt-header>
 	        </v-header>	
-	        <div class="wrapper">
+	        <div class="wrapper" ref="wrapper">
 	        	<div @click="ljzx">
 	        		<img src="/thz/static/banner-fqjs.png" width="100%"/>
 	        	</div>
@@ -70,7 +70,7 @@
 	        					</div>
 	        					<section class="gray-font-color">
 	        						如有问题，可联系微客服，在线咨询 <span class="link-text" @click="ljzx">立即咨询</span>
-	        					</section>
+	        					</section> 
 	        				</span>
 	        			</li>
 	        		</ul>
@@ -89,7 +89,9 @@
 			return {}
 		},
         mounted(){
-        	
+        	if(!browser.versions.weixin){
+        		this.$refs.wrapper.style.top = 0;
+        	}
         },
 		methods: {
 			toBack(){

@@ -1,68 +1,55 @@
 <template>
-    <transition name="move">
-    	<div class="page-animate page-order">
-            <v-header>
-                <mt-header title="购买订单列表">
-                    <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
-                    </div>
-                </mt-header>
-            </v-header>
-            <vue-better-scroll v-if="display"  class="wrapper" ref="scroll" 
-                :pullDownRefresh="pullDownRefreshObj" 
-                :pullUpLoad="pullUpLoadObj"
-                :startY="parseInt(startY)"
-                @pullingDown="onPullingDown"
-                @pullingUp="onPullingUp">
-                <div class="card mgb-10" v-for="(item,index) in items">
-                    <p class="card-title flex">
-                        <span class="grow">下单时间：{{item.orderTime}}</span>
-                        <span class="theme-font-color">{{item.orderStatus}}</span>
-                    </p>
-                    <div class="right-content all-top gray-bg floatorder" @click="lookdetail(item.orderId,item.goodsId)">
-                    	<div class="float floatimg">
-                    		<img v-bind:src="item.goodsUrl" height="60" width="60">
-                    	</div>
-                        
-                        <div class="wrap float floatword">
-                            <h5 class="text-deal">{{item.goodsName}}</h5>
-                        </div>
-                        <div class="backmoney" v-if="item.orderPage == 'C' || item.orderPage == 'D'"><span v-if="item.refundId !== ''">{{item.refundStatus}}</span></div>
-                    </div>
-                    <p class="card-footer">
-                        <span v-if="item.orderPage != 'B'">分期支付:￥{{item.orderAmount}}</span>
-                        <span v-if="item.orderPage == 'B'">{{item.rejectTime}}日后可重新下单</span>
-                        <span class="fr link-btn-gray fenqi" v-if="item.orderPage == 'C'"  @click="fqzd(item.taskId)" >分期账单</span>
-                        <span class="fr link-btn-gray changemoney1" v-if="item.orderPage == 'C'" @click="sale(item.orderId,index)">卖了换钱</span>
-                        <span class="fr link-btn-gray lookdetail" v-if="item.orderPage == 'B' || item.orderPage == 'E'|| item.orderPage == 'G'|| item.orderPage == 'H'" @click="lookdetail(item.orderId,item.goodsId)">查看详情</span>
-                        <span class="fr link-btn-gray lookexpresss1"  v-if="item.orderPage == 'A'"  @click="progress(item.orderId)">查看进度</span>                      
-                        <span class="fr link-btn-gray suremoney1" @click="confirmationreceipt(item.orderId,item.taskId)" v-if="item.orderPage == 'D'">确认收货</span>
-                        <span class="fr link-btn-gray expresss1" v-if="item.orderPage == 'D'" @click="logistics(item.expressId,item.expressCompany)">查看物流</span>
-                        <span class="fr link-btn-gray expresss1" v-if="item.orderPage == '0'" @click="gotoInfo(item.goodsId)">去付款</span>
-                    </p>
+	<div class="page-animate page-order">
+        <v-header>
+            <mt-header title="购买订单列表">
+                <div slot="left">
+                    <mt-button  icon="back" @click.native="toBack"></mt-button>
                 </div>
-            </vue-better-scroll>
-            <div class="no-data-msg" v-show="maxLen">
-                <div class="ds-table">
-                    <div class="ds-tell">
-                        <img src="/thz/static/pic_wujilu@2x.png" width="120">
-                        <p class="mgt-20 gray-font">您还没有购买订单记录~</p>
+            </mt-header>
+        </v-header>
+        <vue-better-scroll v-if="display"  class="wrapper" ref="scroll" 
+            :pullDownRefresh="pullDownRefreshObj" 
+            :pullUpLoad="pullUpLoadObj"
+            :startY="parseInt(startY)"
+            @pullingDown="onPullingDown"
+            @pullingUp="onPullingUp">
+            <div class="card mgb-10" v-for="(item,index) in items"> 
+                <p class="card-title flex">
+                    <span class="grow">下单时间：{{item.orderTime}}</span>
+                    <span class="theme-font-color">{{item.orderStatus}}</span>
+                </p>
+                <div class="right-content all-top gray-bg floatorder" @click="lookdetail(item.orderId,item.goodsId)">
+                	<div class="float floatimg">
+                		<img v-bind:src="item.goodsUrl" height="60" width="60">
+                	</div>
+                    <div class="wrap float floatword">
+                        <h5 class="text-deal">{{item.goodsName}}</h5>
+                    </div>
+                    <div class="backmoney" v-if="item.orderPage == 'C' || item.orderPage == 'D'">
+                        <span v-if="item.refundId !== ''">{{item.refundStatus=="退款申请已取消"?"":item.refundStatus}}</span>
                     </div>
                 </div>
+                <p class="card-footer">
+                    <span v-if="item.orderPage != 'B'">分期支付:￥{{item.orderAmount}}</span>
+                    <span v-if="item.orderPage == 'B'">{{item.rejectTime}}日后可重新下单</span>
+                    <span class="fr link-btn-gray mgt--5 fenqi" v-if="item.orderPage == 'H'"  @click="fqzd(item.taskId)" >分期账单</span>
+                    <span class="fr link-btn-gray mgt--5 changemoney1" v-if="item.orderPage == 'C'" @click="sale(item.orderId,index)">卖了换钱</span>
+                    <span class="fr link-btn-gray mgt--5 lookdetail" v-if="item.orderPage == 'B' || item.orderPage == 'G'" @click="lookdetail(item.orderId,item.goodsId)">查看详情</span>
+                    <span class="fr link-btn-gray mgt--5 lookexpresss1"  v-if="item.orderPage == 'A'"  @click="progress(item.orderId)">查看进度</span>                      
+                    <span class="fr link-btn-gray mgt--5 expresss1" v-if="item.orderPage == '0'" @click="gotoInfo(item.goodsId)">去付款</span>
+                </p>
             </div>
-            <div class="hide-order">
-            	<div class="mode-bottom" v-for="item in items">
-	            	<p>物流公司:<span class="expressCompany">{{expressCompany}}</span><img src="/thz/static/icon_delete@2x.png" class="close-mode" @click="closemode"/></p>
-	            	<p>物流单号:<span class="expressId" id="contents">{{expressId}}</span>
-                        <button class="orderList copy"  data-clipboard-target="#myOrderNum">复制</button>
-                    </p>
-                    <input type="text" id="myOrderNum" v-model="expressId" readonly>                
-	            </div>
-	            <div class="mode"></div>
+        </vue-better-scroll>
+        <div class="no-data-msg" v-show="maxLen">
+            <div class="ds-table">
+                <div class="ds-tell">
+                    <img src="/thz/static/pic_wujilu@2x.png" width="120">
+                    <p class="mgt-20 gray-font">您还没有购买订单记录~</p>
+                </div>
             </div>
-            <router-view />
         </div>
-    </transition>
+        <router-view />
+    </div>
 </template>
 <script>
     import VHeader from '@/components/header'
@@ -131,7 +118,8 @@
 			},
             initData(){
                 let _this=this;
-                api.list({page:_this.page,size:_this.size}).then(res=>{
+                //isLoan 1:分期订单 0：在线支付订单
+                api.list({page:_this.page,size:_this.size,isLoan:"1"}).then(res=>{
                     if(res.code=="200"){
                         _this.display = true;
                         // 当初次进来或者下拉刷新时
@@ -178,67 +166,15 @@
             lookdetail(orderId,goodsId){
                 sessionStorage.setItem("orderId",orderId);
             	sessionStorage.setItem("goodsId",goodsId);
+                sessionStorage.orderType = "stagingOrder";
+                sessionStorage.isLoan = 1;
             	this.$router.push("/home/order/order-detail");
             },			
-            confirmationreceipt(orderId,taskId){
-                let _self = this;
-                layer.open({
-                    content: '请确认已收到货，确认后将不能对订单进行退货操作！'
-                    ,btn: ['确认', '取消']
-                    ,yes: function(index){
-                        api.confirmationreceipt({orderId:orderId}).then(res=>{
-                            if(res.code == 500){
-                                layer.close(index); 
-                                layer.open({
-                                    content: res.msg
-                                    ,skin: 'msg'
-                                    ,time: 2 
-                                });
-                            }
-                            if(res.code == 200){
-                                layer.close(index); 
-                                layer.open({
-                                    content: "确认收货成功"
-                                    ,skin: 'msg'
-                                    ,time: 2,
-                                    end : function(){
-                                        sessionStorage.setItem("taskId",taskId);
-                                        $.publish('app.list');
-                                        _self.$router.push({                 
-                                            path:"/home/receipt"
-                                        });      
-                                    } 
-                                });
-                            }
-                        })   
-                    }
-                });
-            },
-            logistics(eid,ename){ 
-                this.expressCompany = ename;
-                this.expressId = eid;
-            	$(".page-order .hide-order").show();  
-                var clipboard = new Clipboard('.orderList')  
-                clipboard.on('success', e => {  
-                    layer.open({
-                        content: "复制物流单号成功"
-                        ,skin: 'msg'
-                        ,time: 2
-                    });
-                  // 释放内存  
-                  clipboard.destroy()  
-                })  
-                clipboard.on('error', e => {  
-                  // 不支持复制  
-                  console.log('该浏览器不支持自动复制')  
-                  // 释放内存  
-                  clipboard.destroy()  
-                })  
-            },
 			toRouter(e) {
 				this.$router.push(e.params);
 			},
             sale(orderId,i){
+                sessionStorage.orderId = orderId;
                 api.canWithdraws({orderId:orderId,userId:this.userId}).then(res=>{
                     if(res.code=="200"){
                         if(res.body.orderStatus=="C" && res.body.payStatus=="1"){
@@ -280,18 +216,13 @@
             gotoInfo(goodsId){
                 sessionStorage.setItem("goodsId",goodsId);
                 localStorage.setItem("goodsId",goodsId);
-                this.$router.push({
-                    name:"goods-detail",
-                    query : {
-                        goodsId : goodsId
-                    }
-                });
+                this.$router.push("/home/userInfoList");
             },
             closemode(){            	 
                 $(".page-order .hide-order").hide();                         
             },
             progress(){
-                this.$router.replace({name:"progress"}); 
+                this.$router.push({name:"oprogress"}); 
             }
         }
     }
@@ -326,45 +257,11 @@
         
     }
     .hide-order{display: none;}
-    .mode-bottom{
-        background: #fff;
-    	height: 100px;
-    	width: 100%;
-    	position: fixed;
-    	bottom: 0;
-    	z-index: 1;
-    	p{
-    		height: 50px;
-    		line-height: 50px;
-    		border-bottom: 1px solid #f1f1f1;
-    		margin-left: 20px;
-    	}
-    	.copy{
-    		border-radius:2px;
-    		font-size:12px;
-            padding: 2px 9px;
-    		border: 1px solid #888;
-    		color: #888;
-            margin-left: 20px;
-            background: #fff;
-    	}
-    	.close-mode{
-    		float: right;
-    		margin-right: 20px;
-    		width: 20px;
-    		margin-top: 15px;
-    	}
-    	
-    }
-    .mode{
-    	width: 100%;
-    	height: 100%;
-    	background: rgba(0,0,0,0.5);
-    	top: 0;
-    	position: fixed;
-    	z-index: 0;
-    }
+    
     .before-trigger{
         visibility: hidden;
+    }
+    .mgt--5{
+        margin-top: -8px;
     }
 </style>

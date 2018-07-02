@@ -4,7 +4,7 @@
 			<v-header>
 				<mt-header title="工作信息">
 					<div slot="left">
-						<mt-button icon="back" @click.native="toBack">返回</mt-button>
+						<mt-button icon="back" @click.native="toBack"></mt-button>
 					</div>
 				</mt-header>
 			</v-header>
@@ -18,7 +18,6 @@
 								<input type="text" placeholder="请填写公司名称" v-model="paramsObj.companyName" style="width:100%">
 							</span>
 						</div>
-						
 					</a>
 					<a class="weui_cell weui_work">
 						<div class="weui_cell_bd weui_cell_primary">
@@ -33,7 +32,7 @@
 						<div class="weui_cell_bd weui_cell_primary">
 							<span class="fl">公司地址</span> 
 							<span class="fl" id="addrText"   style="width:63%;">
-								<input type="text" class="addr"  v-model="paramsObj.address" placeholder="请定位您所在的城市" id="address" style="width:100%">
+								<input type="text" class="addr"  v-model="paramsObj.address" placeholder="请定位您所在的城市" refs="address" style="width:100%">
 							</span>
 						</div>
 						<div class="weui_cell_ft"></div>
@@ -72,7 +71,7 @@
 						</div>
 						<div class="weui_cell_ft"></div>
 					</a>
-					<a class="weui_cell weui_work" v-tap="{methods:playDay}">
+					<a class="weui_cell weui_work" @click="playDay">
 						<div class="weui_cell_bd weui_cell_primary">
 							<span class="fl">发薪日期</span> 
 							<span class="fl">
@@ -83,18 +82,17 @@
 					</a>
 				</div>
 
-				<!-- 入职时间控件 begin -->
-				<mt-datetime-picker ref="income" type="date" :startDate="startDate" :endDate="endDate" @confirm="handleChange" yearFormat="{value} 年" monthFormat="{value} 月" dateFormat="{value} 日"></mt-datetime-picker>
-				<!-- 入职时间控件 end -->
-
 				<!-- 发薪日期控件 begin -->
-				<vue-pickers :show="playDateFlg" :selectData="payData" v-on:cancel="close" v-on:confirm="confirmFn" class="fixed"></vue-pickers>
+				<vue-pickers :show="playDateFlg" :columns="columns" :defaultData="defaultData" :selectData="payData" @cancel="close" @confirm="confirmDay"></vue-pickers> 
 				<div class="mask" v-show="playDateFlg"></div>
 			    <!-- 发薪日期控件 end -->
 
 				<div class="button-wrap mgt-20 savework">
 	                <mt-button type="primary" size="large" :disabled="saveBtn" @click.stop="save">保存</mt-button>
 	            </div>
+
+	            <awesome-picker ref="picker3" :textTitle="picker3.textTitle" :type="picker3.type" :anchor="picker3.anchor" @confirm="handlePicker3Confirm"></awesome-picker>
+
 			</div>
 			<router-view />
 		</div>
@@ -113,10 +111,11 @@
 		data() {
 			return {
 				saveBtn : true,
-				pickerValue : true,
-		      	playDateFlg : false,
-		      	startDate: new Date('1990/1/1'),
-		      	endDate : new Date(),
+				playDateFlg : false,
+		      	defaultData : [
+		      		{value:"",text:""}
+		      	],
+		      	columns: 1,
 		      	telPrix : "",
 		      	paramsObj : {
 		      		companyName : "",
@@ -131,15 +130,19 @@
 		      		payDayParams : ""
 		      	},
 		      	payData: {
-		          	columns: 1,
-		          	pData1: []
-		        }
+		          	data1: []
+		        },
+		        picker3: {
+			        anchor: [],
+			        textTitle: '入职时间',
+			        type: 'date'
+			   	}
 			}
 		},
 		mounted() {
 			this.userId = JSON.parse(localStorage.getItem("userInfo")).userId;
 			for(let i=1;i<=31;i++){
-				this.payData.pData1.push({text:i,value:i});
+				this.payData.data1.push({text:i,value:i});
 			}
 			if(sessionStorage.getItem('work') == '2'){					
 				$(".mymessage1").find("input").attr("disabled","disabled");				
@@ -161,10 +164,12 @@
 			toBack() {
 				this.$router.back();
 			},
-			handleChange(value) {				
-	      		this.paramsObj.incomeTime = utils.formatDate(value,"yyyy-MM-dd");
-	      		$('.mymessage1 input[disabled]').css("-webkit-text-fill-color","#000");
-				$('.mymessage1 input[disabled]').css("opacity","1");
+	      	handlePicker3Confirm(e){
+	      		let year = e[0].value.slice(0,e[0].value.length-1);
+	      		let month = e[1].value.slice(0,e[1].value.length-1);
+	      		let day = e[2].value.slice(0,e[2].value.length-1);
+	      		this.paramsObj.incomeTime = year+"-"+(month.length>1?month:"0"+month)+"-"+(day.length>1?day:"0"+day);
+	      		this.lst();
 	      	},
 			initData(){
 				let _self = this;
@@ -181,6 +186,8 @@
 						_self.paramsObj.income = data.userIncome;
 						_self.paramsObj.incomeTime = data.careerTime;
 						_self.paramsObj.payDayParams = data.payDay;
+						_self.defaultData[0].value = data.payDay;
+						_self.defaultData[0].text = "每月"+data.payDay+"日";
 						if(sessionStorage.getItem('work') == '2'){					
 							$("#addrText").html(data.addrUp);
 							$(".street").html(data.addrDown);
@@ -195,13 +202,13 @@
 				               $(".addr").val("");
 			                }
 						}
-						if(data.payDay != ""){
+						if(data.payDay){
 							_self.paramsObj.payDay = '每月'+data.payDay+'号';
 						}
 					}else if(res.code=="111"){
                         // 判断安卓和微信
 						if(!sessionStorage.getItem("term")){
-							window.location.href='${project.domain}/index';
+							location.replace(location.origin+'/thz/index');
 						}else{
 							_self.$router.push("/login")
 						}
@@ -217,44 +224,35 @@
 		    open(picker) {
 		    	if(sessionStorage.getItem('work') != '2'){
 		    		if(!sessionStorage.getItem("term")){
-	      				$("#address").focus().blur();
+	      				$(this.$refs.address).focus().blur();
 	      			}
-	      			this.$refs[picker].open();
+	      			this.$refs.picker3.show()
 	            }
 	      	},
 	      	playDay(){
 	      		let _self = this;
 	      		if(sessionStorage.getItem('work') != '2'){
+	      			this.playDateFlg = true;
 	      			if(!sessionStorage.getItem("term")){
-	      				$("#address").focus().blur();
+	      				$(_self.$refs.address).focus().blur();
 	      			}
-	      			// 利用延迟解决安卓点击问题
-		      		this.playDateFlg = true;
-	      		   	setTimeout(function(){
-      		   			$(".area_ctrl").css("position","fixed");
-      		   			// 回显选中的选项
-						$(".work-container .area_province").attr("top",_self.provincePayDay).css({"-webkit-transform":"translate3d(0,"+_self.provincePayDay+",0)"});
-						$(".work-container .area_city").attr("top",_self.cityPayDay).css({"-webkit-transform":"translate3d(0,"+_self.cityPayDay+",0)"});
-						$(".work-container .area_county").attr("top",_self.countyPayDay).css({"-webkit-transform":"translate3d(0,"+_self.countyPayDay+",0)"});
-      		   		},100)
 	      		}
 	      	},
 	      	close(){
 	      		this.playDateFlg = false;
 	      	},
-	      	confirmFn(e){
-	      		this.paramsObj.payDay ='每月'+e['select1'].text+'号';
-	      		this.paramsObj.payDayParams = e['select1'].text;
-	      		this.playDateFlg = false;
-
-	      		this.provincePayDay = $(".work-container .area_province").attr("top");
-				this.cityPayDay = $(".work-container .area_city").attr("top");
-				this.countyPayDay = $(".work-container .area_county").attr("top");
+	      	confirmDay(e){
+	      		this.defaultData[0].value = e.select1.value;
+				this.defaultData[0].text = e.select1.text;
+				this.paramsObj.payDayParams = this.defaultData[0].value;
+				this.paramsObj.payDay = "每月"+this.defaultData[0].value+"日";
+				this.playDateFlg = false;
+				this.lst();
 	      	},
 	      	companyAddr(){
 	      		if(sessionStorage.getItem('work') != '2'){
 	      			sessionStorage.setItem("title","公司地址");
-	      			$("#address").focus().blur();
+	      			$(this.$refs.address).focus().blur();
 					this.$router.push("/amap");
 				}
 	      	},
@@ -303,14 +301,14 @@
 	                        ,skin: 'msg'
 	                        ,time: 2,
 	                        end : function(){
-	                        	 _self.$parent.loadData();
+	                        	_self.$parent.loadData();
 	                        	_self.toBack();
 	                        }
 	                    });
                     }else if(res.code=="111"){
                     	// 判断安卓和微信
 						if(!sessionStorage.getItem("term")){
-							window.location.href='${project.domain}/index';
+							location.replace(location.origin+'/thz/index');
 						}else{
 							_self.$router.push("/login")
 						}

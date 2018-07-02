@@ -4,7 +4,7 @@
             <v-header>
                 <mt-header :title="title">
                     <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                        <mt-button  icon="back" @click.native="toBack"></mt-button>
                     </div>
                 </mt-header>
             </v-header>   
@@ -17,18 +17,14 @@
 		            <div class="add-sex">
 		            	<div class="weui-cells weui-cells_checkbox">
 		            		<ul class="weui">
-							   <li class="bg">
-							   	<p class="sex-p" style=""></p>
-							   	<span style="float:left;margin-left:10px;">先生</span>
-							   	
-							   </li>
-							   <li >
-							   	<p class="sex-p" style=""></p>
-							   	<span style="float:left;margin-left:10px;">女士</span>
-							   	
-							   </li>
+							   	<li class="bg">
+							   		<p class="sex-p" style=""></p><span style="float:left;margin-left:10px;">先生</span>
+							   	</li>
+							   	<li>
+							   		<p class="sex-p" style=""></p>
+							   		<span style="float:left;margin-left:10px;">女士</span>
+							   	</li>
 							</ul>		
-                     
 				        </div>		            	
 		            </div>
 		            <div class="add-name">
@@ -47,11 +43,11 @@
 	            	</div>
 	            </div>
 	            <mt-button type="primary" size="large" class="font-size-14 save-btn-address" :disabled="cmtState" @click="addAddress">保存</mt-button>
-	            <vue-pickers :show="addrFlag" :selectData="pickData" v-on:cancel="close" v-on:confirm="confirmFn"></vue-pickers>
+			    <vue-pickers :show="addrFlag" :link="link" :defaultData="defaultData" :columns="columns" :selectData="pickData" @cancel="close" @confirm="confirmFn"></vue-pickers>
+			    
 	            <div class="mask" v-show="addrFlag"></div>
             </div>            
         </div>
-        
     </transition>  
 </template>
 <script>
@@ -70,26 +66,23 @@
 			   	goodsMobile:"",
 			   	goodsAddress:"",
 			   	goodsArea:"",
-			   	checked1:"",
 			   	palce : "请选择地区",
-			   	checked2:"",			   	
 			   	addrFlag : false,
-			   	provinceIdx :0,
-			   	cityIdx :0,
-			   	county :0,
+			   	link: true,
+			   	columns : 3,
 			   	pickData: {
-		          	columns: 3,
-		          	link: true,
-		          	pData1: provs_data,
-		          	pData2: citys_data,
-		          	pData3: dists_data,
+		          	data1: provs_data,
+		          	data2: citys_data,
+		          	data3: dists_data
 		        },
+		        defaultData : [
+		        	{ value:"",text:"" }
+		        ]
 			}
 		},		
 		mounted() {	
 			let _self = this; 		
 			this.initData();   
-
 			if(location.href.indexOf("edit-address")!=-1){
 				_self.title = "编辑收货地址";
 			}
@@ -102,15 +95,13 @@
 			   }
 			   _self.lts();
 			})
-
 		},		
 		methods: {
 			initData(){	
-				let id=this.$route.query.id;
+				let id= this.$route.query.id;
 				let _self = this;
 				if(id != undefined){
 					api.getDeliveryAddressInfo({id:id}).then(res=>{
-						
 	                    if(res.code=="200"){	                    	
 			                if(res.body.deliveryAppell =="女士"){
 				            	$(".weui li").each(function(){
@@ -127,7 +118,7 @@
 	                    }else if(res.code=="111"){
 	                        // 判断安卓和微信
 							if(!sessionStorage.getItem("term")){
-								window.location.href='${project.domain}/index';
+								window.location.href=location.origin+'/thz/index';
 							}else{
 								_self.$router.push("/login")
 							}
@@ -155,7 +146,8 @@
 				])
 			},
 			addAddress(){
-				let _self = this;		
+				let _self = this;	
+				_self.cmtState = true;	
 				var sex;
 				$(".weui li").each(function(){
 					var _this=this;
@@ -175,22 +167,23 @@
 					}).then(res=>{
 	                    if(res.code=="200"){
 	                    	layer.open({
-			                   content: res.msg
-			                   ,skin: 'msg'
-			                   ,time: 2 ,
-			                   end : function(){                            
-		                        _self.toBack();	
-		                        _self.$parent.updateData();
-		                       }
+			                   	content: res.msg
+			                   	,skin: 'msg'
+			                   	,time: 2 ,
+			                   	end : function(){  
+			                   		_self.$parent.updateData();
+		                        	_self.$router.back();
+		                       	}
 			                });	   
 	                    }else if(res.code=="111"){
 	                        // 判断安卓和微信
 							if(!sessionStorage.getItem("term")){
-								window.location.href='${project.domain}/index';
+								window.location.href=location.origin+'/thz/index';
 							}else{
 								_self.$router.push("/login")
 							}
 	                    }else{
+	                    	_self.cmtState = false;
 							layer.open({
 		                        content: res.msg
 		                        ,skin: 'msg'
@@ -204,26 +197,27 @@
 						goodsMobile:_self.goodsMobile,
 						goodsAddress:_self.goodsAddress,
 						goodsArea:_self.$refs.abc.innerHTML,
-						goodsAppell:sex}).then(res=>{						
-	                    
+						goodsAppell:sex
+					}).then(res=>{						
 	                    if(res.code=="200"){
 	                    	layer.open({
-			                   content: res.msg
-			                   ,skin: 'msg'
-			                   ,time: 2 ,
-			                   end : function(){                            
-		                        _self.toBack();	
-		                        _self.$parent.updateData();
-		                       }
+			                   	content: res.msg
+			                   	,skin: 'msg'
+			                    ,time: 2 ,
+			                   	end : function(){                            
+		                        	_self.$parent.updateData();
+		                        	_self.$router.back();
+		                       	}
 			                });	   
 	                    }else if(res.code=="111"){
 	                        // 判断安卓和微信
 							if(!sessionStorage.getItem("term")){
-								window.location.href='${project.domain}/index';
+								window.location.href=location.origin+'/thz/index';
 							}else{
 								_self.$router.push("/login")
 							}
 	                    }else{
+	                    	_self.cmtState = false;
 							layer.open({
 		                        content: res.msg
 		                        ,skin: 'msg'
@@ -240,19 +234,10 @@
 				this.palce = e['select1'].text+"    "+e['select2'].text+"    "+e['select3'].text;
 	      		this.addrFlag = false;
 	      		this.goodsArea = this.palce;
-	      		this.provinceIdx = $(".add-address-page .area_province").attr("top");
-	      		this.cityIdx = $(".add-address-page .area_city").attr("top");
-	      		this.countyIdx = $(".add-address-page .area_county").attr("top");
 	      		this.lts();
 			},
 			chooseAddr(){
 				this.addrFlag = true;
-				setTimeout(()=>{
-					$(".add-address-page .area_province").attr("top",this.provinceIdx).css({"-webkit-transform":"translate3d(0,"+this.provinceIdx+",0)"});
-					$(".add-address-page .area_city").attr("top",this.cityIdx).css({"-webkit-transform":"translate3d(0,"+this.cityIdx+",0)"});
-					$(".add-address-page .area_county").attr("top",this.countyIdx).css({"-webkit-transform":"translate3d(0,"+this.countyIdx+",0)"});
-				},100)
-				
 			},
 			fstNumber(e){
 				if(e.target.value.length>11){
@@ -265,7 +250,6 @@
 </script>
 <style lang="scss">
  .add-address-page{
-
  	.add-content{
  		overflow-y:auto; 
  		input{outline:none;padding: 4px 0;} 
@@ -299,12 +283,6 @@
 		
 			height:20px;
 			border-radius:20px;
-		}
-		.weui li.bg p{
-			border:0;
-			background:url(/thz/static/icon_sex1@2x.png) no-repeat;
-			background-size:100% 100%;
-			
 		}
 	 	.add-name{
 	 		padding: 15px 0px 15px 20px;
@@ -357,6 +335,14 @@
  		margin: 0 auto;
  		margin-top: 40px;
  	}
+
+ 	.weui li.bg p{
+		border:0;
+		background:url("/thz/static/icon_sex.png") no-repeat;
+		background-size:100% 100%;
+		
+	}
  	
  }
+
 </style>

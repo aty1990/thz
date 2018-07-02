@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import api from '@/fetch/api'
 /**
  * 银行卡号格式化
  * @param  {[type]} obj  [description]
@@ -109,90 +110,63 @@ export function accDiv(arg1, arg2) {
         return accMul((r1 / r2), pow(10, t2 - t1));
     }
 }
-
+/**
+ * 获取微信分享签名参数
+ * @return {[type]} [description]
+ */
+export function getWxSign(){
+     api.getWxSign({url:location.href.split('#')[0]}).then(res=>{
+        if(res.code=="200"){
+            wx.config({
+                debug: false,
+                appId: res.body.appid,
+                timestamp: res.body.timestamp,
+                nonceStr: res.body.noncestr,
+                signature: res.body.signature,
+                jsApiList: ['getLocation','onMenuShareTimeline','onMenuShareAppMessage','previewImage','chooseWXPay']
+            });
+        }
+    })
+}
 /**
  * 微信js-sdk配置
  * @param  {[type]} options [js-sdk对象]
  */
-export function wxConfig(options) {
-    wx.config({
-        debug: false,
-        appId: options.appid,
-        timestamp: options.timestamp,
-        nonceStr: options.noncestr,
-        signature: options.signature,
-        jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareQZone']
-    });
-
-}
-/**
- * 去分享
- * @param  {[type]} list [description]
- * @return {[type]}      [description]
- */
-export function toShare(list) {
-    wx.ready(function() {
-        for (var i = 0; i < list.length; i++) {
-            var shreaTitle = list[i].shreaTitle;
-            var content = list[i].content;
-            var shareLink = list[i].shareLink;
-            var imgUrl = list[i].imgUrl;
-            if (list[i].shareTerminal == "100097") {
-                // 发送给朋友
-                wx.onMenuShareAppMessage({
-                    title: shreaTitle,
-                    desc: content,
-                    link: shareLink,
-                    imgUrl: imgUrl,
-                    type: '',
-                    dataUrl: "",
-                    success: function() {
-                        console.log('分享成功');
-                    },
-                    cancel: function() {
-                        console.log('已取消');
-                    }
-
-                });
-            }
-            if (list[i].shareTerminal == "100098") {
-                // 分享朋友圈
-                wx.onMenuShareTimeline({
-                    title: shreaTitle,
-                    link: shareLink,
-                    imgUrl: imgUrl,
-                    success: function() {
-                        console.log('分享成功');
-                    },
-                    cancel: function() {
-                        console.log('已取消');
-                    }
-                });
-            }
-            if (list[i].shareTerminal == "100099") {
-                // 发送给qq好友
-                wx.onMenuShareQQ({
-                    title: shreaTitle,
-                    desc: content,
-                    link: shareLink,
-                    imgUrl: imgUrl,
-                    success: function() {
-                        console.log('分享成功');
-                    },
-                    cancel: function() {
-                        console.log('已取消');
-                    }
-                });
-
-            }
+export function shareConfig() {
+    wx.getLocation({
+        type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+        success: function (res) {
+            localStorage.setItem("latitude",res.latitude);      // 纬度，浮点数，范围为90 ~ -90
+            localStorage.setItem("longitude",res.longitude);    // 经度，浮点数，范围为180 ~ -180。
+            // 将GPS坐标转化为高德系经纬度
+            AMap.convertFrom(res.longitude+","+res.latitude,"gps",function(status,result){
+                if(result.info=="ok"){
+                    localStorage.setItem("latitude",result.locations[0].lat);       // 纬度，浮点数，范围为90 ~ -90
+                    localStorage.setItem("longitude",result.locations[0].lng);      // 经度，浮点数，范围为180 ~ -180。
+                }
+            });
         }
     });
-
-    wx.error(function(res) {
-        console.log(res);
+    // 根据sessionStorage取值判断 ps这里不能取this.$route.query里的term 以防子页面跳转到当前页this.$route.query里不存在此参数
+    wx.onMenuShareAppMessage({
+        title: "淘花宅商城", // 分享标题
+        desc: "购买商品可变现，提供2000-5000元分期额度", // 分享描述
+        link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+        imgUrl:location.origin + "/thz/static/logo@2x.png", // 分享图标
+        type: '', // 分享类型,music、video或link，不填默认为link
+        dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+        success: function () {}
+    });
+    wx.onMenuShareTimeline({
+        title: "淘花宅商城", // 分享标题
+        link: location.href, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+        imgUrl: location.origin + "/thz/static/logo@2x.png", // 分享图标
+        success: function () {}
     });
 }
-
+/**
+ * 格式化时间
+ */
 export function formatDate(date, fmt) {
     if (/(y+)/.test(fmt)) {
         fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
@@ -216,7 +190,11 @@ export function formatDate(date, fmt) {
 function padLeftZero(str) {
     return ('00' + str).substr(str.length);
 }
-
+/**
+ * 初始化地图插件
+ * @param  {[type]} options [description]
+ * @return {[type]}         [description]
+ */
 export function initMap(options) {
     var lng, lat, 
         latitude = localStorage.getItem("latitude"),
@@ -340,8 +318,6 @@ export function initMap(options) {
             }
         })
     }
-
-
 }
 /**
  * 获取cookie
@@ -435,7 +411,7 @@ export function listenField(arr) {
     }
     return !flag;
 }
-
+// 调用ios和安卓原生接口
 export function iosOrAndroid(method, options,isShow) {
     var flag = false;
     function setupWebViewJavascriptBridge(callback) {

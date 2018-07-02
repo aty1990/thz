@@ -57,7 +57,7 @@
 						    }
 						});
 					}else if(res.code=="401"){
-                        location.href = "https://m.vjiehu.com/jiehu/product/html/market.html";
+                        location.href = "https://go.vjiehu.com/go/index.html#/home?page=2";
                     }else{
 						_self.$router.push({
 							name:"fillCode",
