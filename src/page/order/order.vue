@@ -148,12 +148,7 @@
                             }
                         },1000);
                     }else if(res.code=="111"){
-                        // 判断安卓和微信
-                        if(!sessionStorage.getItem("term")){
-                            window.location.href='${project.domain}/index';
-                        }else{
-                            _this.$router.push("/login")
-                        }
+                        _this.$router.push("/login")
                     }else{
                         layer.open({
                             content: res.msg

@@ -14,7 +14,7 @@
                     <span class="success-msg mgt-10 mgb-20">订单支付失败</span>
                 </div>
                 <div class="weui_cells_access bg-white mgt-10">
-                    <a class="weui_cell weui_person pdl-4" @click="detail(orderDetail.orderId,orderDetail.goodsId)">
+                    <a class="weui_cell weui_person pdl-4" @click="detail(orderDetail.orderId)">
                         <div class="weui_cell_bd weui_cell_primary title">订单信息</div>
                         <div class="weui-cell__ft">查看详情</div>
                     </a>
@@ -28,11 +28,11 @@
                     </a>
                     <a class="weui_cell weui_person pdl-4">
                         <div class="weui_cell_bd weui_cell_primary">配送地址</div>
-                        <div>{{orderDetail.deliveryArea}}</div>
+                        <div>{{orderDetail.deliveryAddress}}</div>
                     </a>
                      <a class="weui_cell weui_person pdl-4">
                         <div class="weui_cell_bd weui_cell_primary">收货人</div>
-                        <div>{{orderDetail.deliveryName}} {{orderDetail.deliveryMobile}}</div>
+                        <div>{{orderDetail.deliveryName}} {{orderDetail.deliveryMobile.slice(0,3)}}****{{orderDetail.deliveryMobile.slice(7)}}</div>
                     </a>
                      <a class="weui_cell weui_person pdl-4">
                         <div class="weui_cell_bd weui_cell_primary">金额</div>
@@ -75,8 +75,8 @@
             toBack(){
                 this.$router.back();
             },
-            detail(orderId,goodsId){
-                this.toDetail({orderId:this.orderDetail.orderId,goodsId:this.orderDetail.goodsId,_self:this});
+            detail(orderId){
+                this.toDetail({orderId:this.orderDetail.orderId,_self:this});
             },
             commit(){
                 this.disabled = true;

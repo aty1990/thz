@@ -371,11 +371,12 @@
                             isLoan : "0"
                         }).then(res=>{
                             if(res.code == "200"){ 
-                                this.$router.push({
+                                sessionStorage.orderId = res.body;
+                                _self.$router.push({
                                     path : "/home/goods/detail/wxpay"
                                 });                  
                             }else if(res.code=="111"){
-                                
+                                _self.$router.replace("/home");
                             }else{
                                 layer.open({
                                     content: res.msg

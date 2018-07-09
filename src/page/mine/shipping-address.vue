@@ -81,11 +81,7 @@
 						}
 					}else if(res.code=="111"){
                         // 判断安卓和微信
-						if(!sessionStorage.getItem("term")){
-							window.location.href='${project.domain}/index';
-						}else{
-							_this.$router.push("/login")
-						}
+						_this.$router.push("/login")
                     }else if(res.code=="106"){
                     	console.log("收货地址为空");
                     }else{
@@ -113,7 +109,7 @@
 	                        ,time: 2
 	                    });
                     }else if(res.code=="111"){
-                        window.location.href='${project.domain}/index';
+                        _self.$router.replace("/login")
                     }else{
 						layer.open({
 	                        content: res.msg
@@ -135,7 +131,7 @@
 				    ,btn: ['确定', '取消']
 				    ,yes: function(index){
 				    	layer.close(index);
-				      	api.deleteDeliveryAddress({id:id}).then(res=>{
+				      	api.deleteDeliveryAddress({id:id}).then(res=>{ 
 		                	if(res.code == 200){
 			                    layer.open({
 			                        content: res.msg
@@ -145,7 +141,7 @@
 			                    _self.current = 0;
 			                    _self.initData();
 		                    }else if(res.code=="111"){
-		                        window.location.href='${project.domain}/index';
+		                        _self.$router.replace("/login")
 		                    }else{
 								layer.open({
 			                        content: res.msg

@@ -26,7 +26,7 @@
 			<div class="no-data-msg hide" ref="noData">
 	            <div class="ds-table">
 	                <div class="ds-tell">
-	                    <img src="/thz/static/pic_wujilu@2x.png" width="120">
+	                    <img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt--80">
 	                    <p class="mgt-20 gray-font">您还没有分期记录~</p>
 	                    <mt-button type="primary" size="large" @click="activeFq" class="active-fq mgt-30 font-size-14">激活分期</mt-button>
 	                </div>
@@ -37,7 +37,7 @@
 					<div class="ds-tell">
 						<img src="/thz/static/load.png" class="loop" width="22" v-if="!errMsg">
 						<div v-if="errMsg">
-							<img src="/thz/static/pic_wujilu@2x.png" width="120">
+							<img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt--80">
 		                    <p class="mgt-20 gray-font">您还没有分期记录~</p>
 		                    <mt-button type="primary" size="large" @click="activeFq" class="active-fq mgt-30 font-size-14">激活分期</mt-button>
 						</div>
@@ -143,6 +143,9 @@
 		}
 		.hide{
 			display:none;
+		}
+		.mgt--80{
+			margin-top: -80px;
 		}
 	}
 </style>

@@ -46,7 +46,7 @@
                 this.$router.push(e.params);
             },
 			dropout() {
-			   	window.location.href='${project.domain}/sigOut';
+			   	window.location.href = location.origin+'/thz/sigOut';
 			}
 		}
 	}

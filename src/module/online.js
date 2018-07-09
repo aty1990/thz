@@ -91,7 +91,7 @@ const actions = {
                                     ,skin: 'msg'
                                     ,time: 2
                                     ,end : function(){
-                                        _self.$router.replace("/wxpay/error");
+                                        _self.$router.push("/wxpay/error");
                                     }
                                 });
                             }else{

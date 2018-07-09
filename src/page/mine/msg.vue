@@ -78,7 +78,7 @@
         <v-header>
             <mt-header title="消息中心">
                 <div slot="left">
-                    <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                    <mt-button  icon="back" @click.native="toBack"></mt-button>
                 </div>
             </mt-header>
         </v-header>

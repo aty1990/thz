@@ -10,7 +10,7 @@
             </v-header>
             <div class="wrapper">
                 <div class="flex vertical bg-white mgb-10">
-                    <span class="prices mgb-10 mgt-20 font-size-20">￥{{goodsData.orderAmount}}</span>
+                    <span class="prices mgb-10 mgt-20 font-size-20">￥{{goodsData.goodsAmount}}</span>
                     <span class="order-num mgb-20">淘花宅商城{{goodsData.orderId}}</span>
                 </div>   
                 <div class="bg-white">

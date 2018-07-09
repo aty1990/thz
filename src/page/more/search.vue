@@ -71,7 +71,7 @@
                 }  
             },
             gyg(){
-                this.$router.replace("/home/jpfq")
+                this.$router.replace("/home")
             }
         }
     }

@@ -14,7 +14,7 @@
                     <span class="success-msg mgt-10 mgb-20">恭喜！订单支付成功</span>
                 </div>
                 <div class="weui_cells_access bg-white mgt-10">
-                    <a class="weui_cell weui_person pdl-4" @click="toDetail(orderDetail.orderId,orderDetail.goodsId)">
+                    <a class="weui_cell weui_person pdl-4" @click="toDetail(orderDetail.orderId)">
                         <div class="weui_cell_bd weui_cell_primary title">订单信息</div>
                         <div class="weui-cell__ft">查看详情</div>
                     </a>
@@ -28,7 +28,7 @@
                     </a>
                     <a class="weui_cell weui_person pdl-4">
                         <div class="weui_cell_bd weui_cell_primary">配送地址</div>
-                        <div>{{orderDetail.deliveryArea}}</div>
+                        <div>{{orderDetail.deliveryAddress}}</div>
                     </a>
                      <a class="weui_cell weui_person pdl-4">
                         <div class="weui_cell_bd weui_cell_primary">收货人</div>
@@ -62,7 +62,7 @@
         },
 		methods : {
             initData(){
-                api.showOrder({goodId:sessionStorage.goodsId}).then((res)=>{
+                api.payResults({orderId:sessionStorage.orderId}).then((res)=>{
                     if(res.code=="200"){
                        this.orderDetail = res.body;
                     }else{
@@ -84,9 +84,8 @@
                     this.$router.go(-2);
                 }
             },
-            toDetail(orderId,goodsId){
+            toDetail(orderId){
                 sessionStorage.setItem("orderId",orderId);
-                sessionStorage.setItem("goodsId",goodsId);
                 sessionStorage.orderType = "onlineOrder";
                 sessionStorage.isLoan = 0;
                 this.$router.push("/home/order/order-detail");

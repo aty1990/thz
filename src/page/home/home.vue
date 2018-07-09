@@ -212,7 +212,8 @@
 				pawnList : [],
 				pawnFlag : false,
 				sumRA : 0,
-				userInfo : null,				
+				userInfo : null,
+				scroller : null,				
 				account : "登录/注册"
 			}
 		},
@@ -224,7 +225,6 @@
         	// 判断当前cookie里的thz_H5的值是否存在存在就根据cookie获取用户信息
         	if(getCookie("thz_H5")){
 	        	api.verUser({ accessToken: getCookie("thz_H5") }).then(res=>{
-	        		//alert(JSON.stringify(res));
 	        		// 没有权限
 	        		if(res.code=="111"){
 						// 判断安卓和微信
@@ -265,16 +265,6 @@
 		methods: {
 			init(){
 				let _self = this;
-	        	// 获取跳转到当前页面的目标源 term等于android为安卓端访问
-	        	let term  = this.$route.query.term;
-	        	// 有值就存入sessionStorage
-	        	if(term){
-	        		sessionStorage.setItem("term",term);
-	        	}
-	        	// 如果是微信游览器则删除term
-	        	if(browser.versions.weixin){
-	        		sessionStorage.removeItem("term");
-	        	}
 	        	
 	        	// 监听子页面发布广播事件 用于刷新当前页面数据
 	        	$.subscribe('app.thz', function(e, results) {
@@ -292,7 +282,10 @@
 			},
 			getHomeData(){
 				sessionStorage.selected = "首页";
-	            this.init();
+				setTimeout(()=>{
+					this.scroller.refresh();
+				},400);
+	            
 			},
 			// 用户点击换钱选项卡时刷新换钱页面数据
 			getPawnTabData(){
@@ -307,7 +300,7 @@
 				let items = $(this.$refs.tabcontent).find(".home-tab-item");
 				let width = items.length*(items.eq(0).outerWidth(true));
 	            this.$refs.tabcontent.style.width=width+'px';
-	           	new BScroll(this.$refs.homeScroll, {
+	           	this.scroller = new BScroll(this.$refs.homeScroll, {
                     startX:0,
                     click:true,
                     scrollX:true,
@@ -339,13 +332,11 @@
 
 						// 支付优选banner
 						_self.jxhd_banners = res.body.jxhd_banners;
-
-						_self.$nextTick(()=>{
-							// 隐藏加载层
-							_self.hasData = true;
+						_self.hasData = true;
+				        setTimeout(()=>{
+				        	// 隐藏加载层
 							_self.initTabScroll();
-				        });
-
+				        },500);
 					}
 				})
 			},
@@ -375,11 +366,7 @@
 							if(_url.indexOf("kefu")!=-1){
 								// 如果为苹果系统则直接打开链接，因为ios不支持iframe
 								if(browser.versions.ios){
-									if(sessionStorage.getItem("term")){
-										iosOrAndroid("Open Page",{url:sessionStorage.getItem("kfLink")},false);
-									}else{
-										location.href = sessionStorage.getItem("kfLink");
-									}
+									location.href = sessionStorage.getItem("kfLink");
 								}else{
 									// 标识去联系客服的源
 									sessionStorage.setItem("from","home");
@@ -390,11 +377,7 @@
 							}else if(_url.indexOf("shouhou")!=-1){
 								// 判断同联系客服
 								if(browser.versions.ios){
-									if(sessionStorage.getItem("term")){
-										iosOrAndroid("Open Page",{url:"http://free.weikefu.net/AppKeFu/weikefu/web/chat.php?wg=taohuazkf&robot=false&hidenav=true"},false);
-									}else{
-										location.href = "http://free.weikefu.net/AppKeFu/weikefu/web/chat.php?wg=taohuazkf&robot=false&hidenav=true";
-									}
+									location.href = "http://free.weikefu.net/AppKeFu/weikefu/web/chat.php?wg=taohuazkf&robot=false&hidenav=true";
 								}else{
 									_self.$router.push(_url);
 								}

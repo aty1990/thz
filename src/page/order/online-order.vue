@@ -40,7 +40,7 @@
 	                    </p>
 	                </div>
 	                <div class="flex vertical mgt-40" v-show="orderList.length==0">
-		                <img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt-40">
+		                <img src="/thz/static/pic_kong@2x.png" width="120" class="mgt-40">
 		                <p class="mgt-20 gray-font">您还没有在线支付的订单记录~</p>
 		            </div>
                   </mt-tab-container-item>  
@@ -64,7 +64,7 @@
 	                    </p>
                    	</div>
                    	<div class="flex vertical mgt-40" v-show="paymentList.length==0">
-		                <img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt-40">
+		                <img src="/thz/static/pic_kong@2x.png" width="120" class="mgt-40">
 		                <p class="mgt-20 gray-font">您还没有待付款的订单记录~</p>
 		            </div>
                   </mt-tab-container-item> 
@@ -90,7 +90,7 @@
 	                    </p>
 	                </div>
 	                <div class="flex vertical mgt-40" v-show="unCollectList.length==0">
-		                <img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt-40">
+		                <img src="/thz/static/pic_kong@2x.png" width="120" class="mgt-40">
 		                <p class="mgt-20 gray-font">您还没有待收货订单记录~</p>
 		            </div>
                   </mt-tab-container-item> 
@@ -114,7 +114,7 @@
 	                    </p>
                    	</div>
                    	<div class="flex vertical mgt-40" v-show="completeList.length==0">
-		                <img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt-40">
+		                <img src="/thz/static/pic_kong@2x.png" width="120" class="mgt-40">
 		                <p class="mgt-20 gray-font">您还没有已完成的订单记录~</p>
 		            </div>
                   </mt-tab-container-item>  
@@ -138,7 +138,7 @@
 	                    </p>
                    	</div>
                    	<div class="flex vertical mgt-40" v-show="refundList.length==0">
-		                <img src="/thz/static/pic_wujilu@2x.png" width="120" class="mgt-40">
+		                <img src="/thz/static/pic_kong@2x.png" width="120" class="mgt-40">
 		                <p class="mgt-20 gray-font">您还没有退款售后的订单记录~</p>
 		            </div>
                   </mt-tab-container-item>   

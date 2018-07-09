@@ -95,18 +95,10 @@
 				api.loandetail({userId: userId,taskId:taskId}).then(res=>{
                     if(res.code=="200"){ 
                     	_this["items"] = res.body.list; 
-                    	_this.staging.periodNum=res.body.periodNum;
-                    	_this.staging.allRepayment=res.body.allRepayment;                   	
-                    	_this.staging.sumAmount=res.body.sumAmount;                   	
-                    	_this.staging.taskStat=res.body.taskStat;
-                    	_this.staging.downloadUrl=res.body.downloadUrl;
+                    	_this.staging = res.body;
 					}else if(res.code=="111"){
                         // 判断安卓和微信
-						if(!sessionStorage.getItem("term")){
-							window.location.href='${project.domain}/index';
-						}else{
-							_this.$router.push("/login")
-						}
+						_this.$router.push("/login")
                     }else{
 						layer.open({
 	                        content: res.msg

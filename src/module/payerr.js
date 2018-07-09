@@ -4,7 +4,7 @@ const state = {
 }
 const actions = {
     initData({ state, commit }){
-        api.showOrder({goodId:sessionStorage.goodsId}).then((res)=>{
+        api.payResults({orderId:sessionStorage.orderId}).then((res)=>{
             if(res.code=="200"){
                commit("payerr/showOrder",res.body,{root:true}); 
            }else{
@@ -16,9 +16,8 @@ const actions = {
            }
         });  
     },
-    toDetail({ state, commit },{ orderId,goodsId,_self }){
+    toDetail({ state, commit },{ orderId,_self }){
         sessionStorage.setItem("orderId",orderId);
-        sessionStorage.setItem("goodsId",goodsId);
         sessionStorage.orderType = "payerr";
         sessionStorage.isLoan = 0;
         _self.$router.replace("/home/order/order-detail");

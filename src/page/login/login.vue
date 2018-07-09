@@ -122,65 +122,24 @@
             sms(){
                 let _self = this;
                 let loginChannel = this.$route.query.loginChannel;
-                if(sessionStorage.getItem("term")){
-                    // 安卓端免密登录
-                    $.ajax({
-                        url: "/thz/support/unWxVerifications",
-                        type: "post",
-                        data: {userMob: _self.phone,smsNum: _self.code },
-                        headers: {    
-                            jhVer: "2.0.0",
-                            loginTerm : sessionStorage.getItem("term"),
-                            loginChannel : loginChannel?loginChannel:"",
-                            rand: Math.round(Math.random() * 89999) + 10000
-                        },
-                        beforeSend: function() {
-                            $("body").Loading("show");
-                        },
-                        complete: function() {
-                            $("body").Loading("hide");
-                        },
-                        success: function(res) {
-                            if(res.code == "201"){
-                                layer.open({
-                                    content: res.msg
-                                    ,skin: 'msg'
-                                    ,time: 2,
-                                    end : function(){
-                                        _self.$router.replace("/home");
-                                    }
-                                });
-                            }else if(res.code == "200"){
-                                _self.$store.state.index.account = _self.phone;
-                                _self.$router.push({
-                                    name:"loginToSetpwd",
-                                    query :{
-                                        smsNum : _self.code
-                                    }
-                                });
-                            }
-                        }
-                    })
-                }else{
-                    // 微信端免密登录 
-                    api.verifications({userMob: _self.phone,smsNum: _self.code }).then(res=>{
-                        // code 200跳设置密码  201自动登录  401用户被拒，跳贷款超市
-                        if(res.code=="200"){
-                            _self.$store.state.index.account = _self.phone;
-                            _self.$router.push({name:"loginToSetpwd"});
-                        }else if(res.code=="201"){
-                             _self.$router.back();
-                        }else if(res.code=="401"){
-                            location.href = "https://m.vjiehu.com/jiehu/product/html/market.html";
-                        }else{
-                           layer.open({
-                                content: res.msg
-                                ,skin: 'msg'
-                                ,time: 2
-                            });  
-                        }
-                    });
-                }
+                // 微信端免密登录 
+                api.verifications({userMob: _self.phone,smsNum: _self.code }).then(res=>{
+                    // code 200跳设置密码  201自动登录  401用户被拒，跳贷款超市
+                    if(res.code=="200"){
+                        _self.$store.state.index.account = _self.phone;
+                        _self.$router.push({name:"loginToSetpwd"});
+                    }else if(res.code=="201"){
+                         _self.$router.back();
+                    }else if(res.code=="401"){
+                        location.href = "https://m.vjiehu.com/jiehu/product/html/market.html";
+                    }else{
+                       layer.open({
+                            content: res.msg
+                            ,skin: 'msg'
+                            ,time: 2
+                        });  
+                    }
+                });
             },
             getUserInfo(accessToken,msg){
                 let _self =  this;

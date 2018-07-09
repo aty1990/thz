@@ -6,9 +6,9 @@ const state = {
 }
 const actions = {
     initData({ state, commit, rootState }){
-        api.showOrder({goodId:sessionStorage.goodsId}).then((res)=>{
+        api.payResults({orderId:sessionStorage.orderId}).then((res)=>{ 
             if(res.code=="200"){
-               commit("wxpay/showOrder",res.body,{root:true}); 
+               commit("wxpay/payResults",res.body,{root:true}); 
            }else{
                 layer.open({
                      content: res.msg
@@ -66,7 +66,7 @@ const getters = {
 
 }
 const mutations = {
-    showOrder(state,result){
+    payResults(state,result){
         state.goodsData = result;
     },
     playStyle(state,result){

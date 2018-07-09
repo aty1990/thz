@@ -27,18 +27,18 @@
 						<p>{{orderdetail.deliveryAddress}}</p>
 					</div>
 				</section>
-				<section class="flex pd-all-10">
-					<div class="img-wrap">
+				<section class="flex pd-all-10 all-top">
+					<div class="img-wrap" @click="toDetalPage">
 						<img v-bind:src="orderdetail.goodsUrl">
 					</div>
 					<div class=" grow vertical pdl-10 text-left">
-						<p class="text-deal font-size-12">{{orderdetail.goodsName}}</p>
+						<p class="text-deal font-size-12"  @click="toDetalPage">{{orderdetail.goodsName}}</p>
 						<div class="mgt-16 flex full-w">
 							<h3 class="grow text-left">￥{{orderdetail.orderAmount}}</h3>
 							<span class="refundStatus" v-if="orderdetail.refundStatus=='FS'">退款成功</span>
 							<span class="refundStatus" v-if="orderdetail.refundStatus=='FC'">退款申请已取消</span>
 							<span class="refundStatus link-btn-yellow" v-if="orderdetail.refundStatus=='FB' || orderdetail.refundStatus=='FA'" @click="refundback1(orderdetail.orderId,orderdetail.refundId,orderdetail.refundStatus)">退款审核中</span>
-							<span class="refundStatus" v-if="orderdetail.refundStatus=='FF' || orderdetail.refundStatus=='FG'">退款处理中</span>
+							<span class="refundStatus" v-if="orderdetail.refundStatus=='FF' || orderdetail.refundStatus=='FG' || orderdetail.refundStatus=='FW'">退款处理中</span>
 							<span class="refundStatus" v-if="orderdetail.refundStatus=='FK'">退款失败</span>
 							<span class="refundStatus link-btn-yellow" v-if="orderdetail.refundStatus=='FD'" @click="refundback1(orderdetail.orderId,orderdetail.refundId,orderdetail.refundStatus)">退货</span>
 							<span id="tuikuang" v-if="(orderdetail.orderPage=='C' || orderdetail.orderPage=='D') && orderdetail.refundId=='' && orderdetail.isLoan==0" 
@@ -57,26 +57,22 @@
 							实付费：<span class="fr theme-font-color">￥{{orderdetail.totalAmount}}</span>
 						</p>
 					</template>
-					
-					
 					<template v-if="orderdetail.orderPage=='H'">
 						<p class="item">转卖金额：<span class="fr">￥{{orderdetail.backAmount}}</span></p>
 						<p class="item">转卖时间：<span class="fr">{{orderdetail.cashTime}}</span></p>
 						<p class="item">转卖公司：<span class="fr">{{orderdetail.cashCompany}}</span></p>
 					</template>
-					
-
 					<template v-if="orderdetail.refundStatus=='FS' || orderdetail.refundStatus=='FK'">
 						<p class="item"><span>退款金额：</span><span class="fr">￥{{orderdetail.refundStatus=="FS"?orderdetail.refundAmount:orderdetail.orderAmount}}</span></p>
 						<p class="item">申请时间：<span class="fr">{{orderdetail.applyRefundTime}}</span></p>
 						<p class="item" >退款编号：<span class="fr">{{orderdetail.refundId}}</span></p>
 					</template>
-
 					<p class="item pdb-10 more-icon" v-if="orderdetail.orderPage=='H' && orderdetail.isLoan==1" @click="fqzd(orderdetail.taskId)" >查看分期账单</p>
 				</template>
 				<template v-if="orderdetail.orderPage=='G' && orderdetail.refundId">
+					<p class="item"><span>退款金额：</span><span class="fr">￥{{orderdetail.refundStatus=="FS"?orderdetail.refundAmount:orderdetail.orderAmount}}</span></p>
 					<p class="item"><span>申请时间：</span><span class="fr">{{orderdetail.orderTime}}</span></p>
-					<p class="item" v-if="orderdetail.refundId"><span>退款编号：</span><span class="fr">{{orderdetail.refundId}}</span></p>
+					<p class="item"><span>退款编号：</span><span class="fr">{{orderdetail.refundId}}</span></p>
 					<p class="item pdb-10 more-icon" v-if="orderdetail.isLoan==1"  @click="fqzd(orderdetail.taskId)" >查看分期账单</p>
 					<p></p>
 				</template>
@@ -87,12 +83,10 @@
 				<footer class="footer" v-if="orderdetail.orderPage!='E' && orderdetail.orderPage!='B'">
 					<span class="link-btn-gray lookexpresss" v-if="orderdetail.orderPage=='A'" @click="progress(orderdetail.orderId)">查看进度</span>
 					<span class="link-btn-gray changemoney red-style"  @click="sale(orderdetail.orderId)">卖了换钱</span>
-					
 					<template v-if="orderdetail.orderPage=='D'">
 						<span class="link-btn-gray" @click="logistics1()">查看物流</span>
 						<span class="link-btn-gray"  @click="confirmationreceipt1(orderdetail.orderId,orderdetail.taskId)">确认收货</span>
 					</template>
-					
 					<span class="link-btn-gray" v-if="orderdetail.orderPage!='D' && orderdetail.orderPage!='0'"  @click="kefu">联系客服</span>
 					<span class="link-btn-gray red-style" v-if="orderdetail.orderPage==0" @click="gotoplay">{{orderdetail.isLoan==1?"去付款":"立即付款"}}</span>
 				</footer>
@@ -205,6 +199,11 @@
 			},
 			refund() {
 				this.$router.push({ name: "refund" });
+			},
+			toDetalPage(){
+				sessionStorage.setItem("goodsId",this.orderdetail.goodsId);
+				localStorage.setItem("goodsId",this.orderdetail.goodsId);
+				this.$router.push("/home/goods-detail");
 			},
 			gotoplay(){
 				sessionStorage.setItem("goodsId",this.orderdetail.goodsId);

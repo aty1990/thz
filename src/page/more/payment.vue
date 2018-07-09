@@ -88,6 +88,7 @@
 	        		size : 100,
 	        		is_banner : "1"
 	        	}
+	        	this.loan_goods = [];
 	        	// 首页 / 首页--类型筛选
 	        	api.indexGoodsPage(params).then(res=>{ 
 	        		if(res.code=="200"){

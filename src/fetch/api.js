@@ -253,6 +253,14 @@ export default {
         return postData('/thz/shop/showOrder', params)
     },
     /**
+     * 首页 / 订单提交前/后回显
+     * @param  {[type]} params [description]
+     * @return {[type]}        [description]
+     */
+    payResults(params){
+        return postData('/thz/order/payResults', params)
+    },
+    /**
      * 我的 / 分期记录
      * @param  {[type]} params [description]
      * @return {[type]}        [description]

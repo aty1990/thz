@@ -78,17 +78,20 @@
         },
 		methods: {
 			initData(){
-				// 获取当前日期，用于判断进入该页面的时间是否是重复进入
-	        	if(localStorage.msec){
-	        		let day = (new Date()).getDate();
-	        		if(day!=Number(localStorage.msec)){
-	        			this.sendcode = true;
-	        			localStorage.msec = day;
-	        		}
-	        	}else{
-	        		localStorage.msec = (new Date()).getDate();
-	        		this.sendcode = true;
-	        	}
+				// 判断是否在微信中打开
+				if(browser.versions.weixin){
+					// 获取当前日期，用于判断进入该页面的时间是否是重复进入
+		        	if(localStorage.msec){
+		        		let day = (new Date()).getDate();
+		        		if(day!=Number(localStorage.msec)){
+		        			this.sendcode = true;
+		        			localStorage.msec = day;
+		        		}
+		        	}else{
+		        		localStorage.msec = (new Date()).getDate();
+		        		this.sendcode = true;
+		        	}
+				}
 	        	this.getData();
 			},
 			getData(){
@@ -101,6 +104,7 @@
 	        		size : 100,
 	        		is_banner : "1"
 	        	}
+	        	this.loan_goods = [];
 	        	// 首页 / 首页--类型筛选
 	        	api.indexGoodsPage(params).then(res=>{ 
 	        		if(res.code=="200"){

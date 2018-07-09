@@ -4,7 +4,7 @@
             <v-header>
                 <mt-header title="提交订单">
                     <div slot="left">
-                        <mt-button  icon="back" @click.native="toBack">返回</mt-button>
+                        <mt-button  icon="back" @click.native="toBack"></mt-button>
                     </div>
                 </mt-header>
             </v-header>
@@ -156,12 +156,7 @@
                         _self.addrObj.id = res.body.id;
                         _self._showOrder();
                     }else if(res.code=="111"){
-                        // 判断安卓和微信
-                        if(!sessionStorage.getItem("term")){
-                            window.location.href='${project.domain}/index';
-                        }else{
-                            _self.$router.push("/login")
-                        }
+                        _self.$router.push("/login")
                     }else{
                         layer.open({
                             content: res.msg
@@ -195,7 +190,7 @@
                         _self.periods = res.body.periods;
                         _self.repayPerPeriods = res.body.repayPerPeriods;
                     }else if(res.code=="111"){
-                        window.location.href='${project.domain}/index';
+                        _self.$router.push("/login")
                     }else{
                         layer.open({
                             content: res.msg
@@ -245,11 +240,7 @@
 	                            }                                                                  
 	                    	}else if(res.code=="111"){
 	                            // 判断安卓和微信
-                                if(!sessionStorage.getItem("term")){
-                                    window.location.href='${project.domain}/index';
-                                }else{
-                                    _self.$router.push("/login")
-                                }
+                               _self.$router.push("/login")
 	                    	}else{
 	                    		layer.open({
 		                            content: res.msg

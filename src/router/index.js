@@ -80,6 +80,7 @@ const H5Stages = r => require.ensure([], () => r(require('@/page/h5/stages')), '
 const H5Jkfqxy1 = r => require.ensure([], () => r(require('@/page/h5/jkfqxy1')), 'h5Jkfqxy1');
 const H5Jkfqxy = r => require.ensure([], () => r(require('@/page/h5/jkfqxy')), 'h5Jkfqxy');
 const H5xy = r => require.ensure([], () => r(require('@/page/h5/xy')), 'h5xy');
+const H5Messdetails = r => require.ensure([], () => r(require('@/page/h5/messdetails')), 'h5Messdetails');
 
 export default new Router({
     routes: [
@@ -312,8 +313,7 @@ export default new Router({
         },
         { path: '/h5/jkfq/1', name: 'h5Jkfqxy1', meta: { title: "借分期分期协议" }, component: H5Jkfqxy1 },
         { path: '/h5/jkfq/2', name: 'h5Jkfqxy', meta: { title: "借分期分期协议" }, component: H5Jkfqxy },
-        { path: '/h5/xy', name: 'h5xy', meta: { title: "注册协议" }, component: H5xy }
-        
-
+        { path: '/h5/xy', name: 'h5xy', meta: { title: "注册协议" }, component: H5xy },
+        { path: '/h5/messdetails', name: 'messdetails', meta: { title: "详情" }, component: H5Messdetails }
     ]
 })
